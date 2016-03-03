@@ -1,0 +1,7 @@
+[debug] Copy resource mappings: 
+[debug] 	(E:\eclipse\workspace_new\workspace_scala\sbdsample\server\src\main\resources\static,E:\eclipse\workspace_new\workspace_scala\sbdsample\server\target\scala-2.10\classes\static)
+[debug] 	(E:\eclipse\workspace_new\workspace_scala\sbdsample\server\src\main\resources\static\index.html,E:\eclipse\workspace_new\workspace_scala\sbdsample\server\target\scala-2.10\classes\static\index.html)
+[debug] 	(E:\eclipse\workspace_new\workspace_scala\sbdsample\server\src\main\resources\static\scripts,E:\eclipse\workspace_new\workspace_scala\sbdsample\server\target\scala-2.10\classes\static\scripts)
+[debug] 	(E:\eclipse\workspace_new\workspace_scala\sbdsample\server\src\main\resources\static\styles,E:\eclipse\workspace_new\workspace_scala\sbdsample\server\target\scala-2.10\classes\static\styles)
+[debug] 	(E:\eclipse\workspace_new\workspace_scala\sbdsample\server\src\main\resources\static\scripts\main.js,E:\eclipse\workspace_new\workspace_scala\sbdsample\server\target\scala-2.10\classes\static\scripts\main.js)
+[debug] 	(E:\eclipse\workspace_new\workspace_scala\sbdsample\server\src\main\resources\static\styles\main.css,E:\eclipse\workspace_new\workspace_scala\sbdsample\server\target\scala-2.10\classes\static\styles\main.css)

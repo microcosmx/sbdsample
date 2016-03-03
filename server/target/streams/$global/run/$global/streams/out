@@ -1,0 +1,24 @@
+[0m[[0minfo[0m] [0mRunning Main [0m
+[0m[[0minfo[0m] [0m118588@IBM-P163Y1W[0m
+[0m[[0minfo[0m] [0mSystem.setProperty: database.password=Welcome1[0m
+[0m[[0minfo[0m] [0mSystem.setProperty: database.driver=com.ibm.db2.jcc.DB2Driver[0m
+[0m[[0minfo[0m] [0mSystem.setProperty: server.port=10000[0m
+[0m[[0minfo[0m] [0mSystem.setProperty: database.userName=dtuser[0m
+[0m[[0minfo[0m] [0mSystem.setProperty: server.host=0.0.0.0[0m
+[0m[[0minfo[0m] [0mSystem.setProperty: database.connString=jdbc:db2://localhost:50000/dtdev[0m
+[0m[[31merror[0m] [0mUsing Spark's default log4j profile: org/apache/spark/log4j-defaults.properties[0m
+[0m[[31merror[0m] [0m16/03/02 15:22:54 INFO SparkContext: Running Spark version 1.4.1[0m
+[0m[[31merror[0m] [0m16/03/02 15:22:56 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable[0m
+[0m[[31merror[0m] [0m16/03/02 15:22:56 ERROR SparkContext: Error initializing SparkContext.[0m
+[0m[[31merror[0m] [0morg.apache.spark.SparkException: A master URL must be set in your configuration[0m
+[0m[[31merror[0m] [0m	at org.apache.spark.SparkContext.<init>(SparkContext.scala:368)[0m
+[0m[[31merror[0m] [0m	at Main$.initSparkContext(Main.scala:25)[0m
+[0m[[31merror[0m] [0m	at Main$.main(Main.scala:42)[0m
+[0m[[31merror[0m] [0m	at Main.main(Main.scala)[0m
+[0m[[31merror[0m] [0m16/03/02 15:22:56 INFO SparkContext: Successfully stopped SparkContext[0m
+[0m[[31merror[0m] [0mException in thread "main" org.apache.spark.SparkException: A master URL must be set in your configuration[0m
+[0m[[31merror[0m] [0m	at org.apache.spark.SparkContext.<init>(SparkContext.scala:368)[0m
+[0m[[31merror[0m] [0m	at Main$.initSparkContext(Main.scala:25)[0m
+[0m[[31merror[0m] [0m	at Main$.main(Main.scala:42)[0m
+[0m[[31merror[0m] [0m	at Main.main(Main.scala)[0m
+[0m[[31merror[0m] [0m16/03/02 15:22:56 INFO Utils: Shutdown hook called[0m
