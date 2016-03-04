@@ -14,6 +14,9 @@ libraryDependencies ++= Seq(
     "org.apache.spark" %% "spark-sql"       % "1.4.1" % "provided",
     "org.apache.spark" %% "spark-hive"      % "1.4.1" % "provided",
     "org.apache.spark" %% "spark-mllib"     % "1.4.1" % "provided",
+    "org.apache.spark" %% "spark-streaming" % "1.4.1" % "provided",
+  	"org.apache.spark" %% "spark-streaming-kafka" % "1.4.1" % "provided",
+  	"org.apache.spark" %% "spark-streaming-flume" % "1.4.1" % "provided",
     
     "org.slf4j" % "slf4j-api" % "1.7.5",
     "org.slf4j" % "slf4j-log4j12" % "1.7.5",

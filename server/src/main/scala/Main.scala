@@ -12,6 +12,7 @@ import org.apache.spark._
 import org.apache.spark.sql._
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
+import org.apache.spark.streaming._
 import scala.collection.JavaConversions._
 import scala.concurrent._
 import scala.concurrent.duration._
@@ -81,6 +82,7 @@ object Main extends App {
         val fs = initFileSystem(sc, cfg.slice("fs."))
         val jdbc = initJDBC(fs,cfg)
         val ml = MLSample(sc)
+        val ss = SStream(sc)
         val env = Env(system, cfg, fs, jdbc, ml, sc, sqlContext)
         
         
@@ -101,10 +103,20 @@ object Main extends App {
         tDF.registerTempTable("pltable")
         sqlContext.cacheTable("pltable")
         
+        println("---------dataframe---------------: ")
+        tDF.show()
+        tDF.printSchema()
+        tDF.select("pKey").show()
+        tDF.select(tDF("pKey"), tDF("val1") + 1).show()
+        tDF.filter(tDF("val1") > 21).show()
+        tDF.groupBy("pKey").count().show()
         
         //machine learning
         ml.mlexec()
         //ml.mlKMeans()
+        
+        //streaming
+        //ss.streamExec()
         
         //http server actor
         system.actorOf(Props(classOf[Server], env).withRouter(RoundRobinPool(5)), name = "server")
