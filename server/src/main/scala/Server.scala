@@ -18,6 +18,7 @@ import scala.util.matching._
 import scala.util.{Success,Failure}
 import spray.can.Http
 import spray.can.server.Stats
+import spray.can._
 import spray.client.pipelining._
 import spray.http._
 import spray.http.CacheDirectives._

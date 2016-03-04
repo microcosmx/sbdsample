@@ -1,21 +1,21 @@
 [info] Including from cache: spray-client_2.10-1.3.3.jar
-[info] Including from cache: db2jcc4-1.6.0a.jar
-[info] Including from cache: mysql-connector-java-5.1.28.jar
 [info] Including from cache: spray-io_2.10-1.3.3.jar
+[info] Including from cache: spray-json_2.10-1.3.2.jar
 [info] Including from cache: spray-util_2.10-1.3.3.jar
 [info] Including from cache: spray-routing_2.10-1.3.3.jar
-[info] Including from cache: spray-json_2.10-1.3.2.jar
-[info] Including from cache: spray-http_2.10-1.3.3.jar
-[info] Including from cache: spray-httpx_2.10-1.3.3.jar
-[info] Including from cache: mimepull-1.9.5.jar
-[info] Including from cache: parboiled-scala_2.10-1.1.7.jar
-[info] Including from cache: parboiled-core-1.1.7.jar
 [info] Including from cache: log4j-1.2.17.jar
 [info] Including from cache: slf4j-api-1.7.5.jar
-[info] Including from cache: shapeless_2.10-1.2.4.jar
+[info] Including from cache: spray-httpx_2.10-1.3.3.jar
 [info] Including from cache: slf4j-log4j12-1.7.5.jar
-[info] Including from cache: scala-library-2.10.5.jar
+[info] Including from cache: mimepull-1.9.5.jar
+[info] Including from cache: shapeless_2.10-1.2.4.jar
+[info] Including from cache: spray-http_2.10-1.3.3.jar
+[info] Including from cache: mysql-connector-java-5.1.28.jar
+[info] Including from cache: parboiled-scala_2.10-1.1.7.jar
 [info] Including from cache: spray-can_2.10-1.3.3.jar
+[info] Including from cache: parboiled-core-1.1.7.jar
+[info] Including from cache: scala-library-2.10.5.jar
+[info] Including from cache: db2jcc4-1.6.0a.jar
 [debug] Calculate mappings...
 [info] Checking every *.class/*.jar file's SHA-1.
 [info] Merging files...
@@ -26,7 +26,7 @@
 [warn] Strategy 'concat' was applied to a file
 [warn] Strategy 'discard' was applied to 2 files
 [warn] Strategy 'filterDistinctLines' was applied to a file
-[info] SHA-1: 542b6205f396cf75a15a23ede880c6343a7a3b92
+[info] SHA-1: 4b035ea12175b93286dd1fcec14ab9184077c220
 [info] Packaging E:\eclipse\workspace_new\workspace_scala\sbdsample\server\target\scala-2.10\sbdsample-assembly-0.1-SNAPSHOT.jar ...
 [debug] Input file mappings:
 [debug] 	Actors$.class
@@ -305,6 +305,30 @@
 [debug] 	  E:\eclipse\workspace_new\workspace_scala\sbdsample\server\target\streams\$global\assemblyOption\$global\streams\assembly\02cb00627e0368127945d73aee0a0b78fed37e3b_6edffc576ce104ec769d954618764f39f0f0f10d\META-INF\maven\org.slf4j\slf4j-log4j12\pom.xml
 [debug] 	META-INF\services\java.sql.Driver
 [debug] 	  E:\eclipse\workspace_new\workspace_scala\sbdsample\server\target\streams\$global\assemblyOption\$global\streams\assembly\sbtMergeTarget-83d0980d9a36b94fece4372146816058c387741e.tmp
+[debug] 	MLSample$$anonfun$1$$anonfun$apply$1.class
+[debug] 	  E:\eclipse\workspace_new\workspace_scala\sbdsample\server\target\streams\$global\assemblyOption\$global\streams\assembly\6c3c6b2a160fe9dfd234c4e520610feffd88ff98_dir\MLSample$$anonfun$1$$anonfun$apply$1.class
+[debug] 	MLSample$$anonfun$1.class
+[debug] 	  E:\eclipse\workspace_new\workspace_scala\sbdsample\server\target\streams\$global\assemblyOption\$global\streams\assembly\6c3c6b2a160fe9dfd234c4e520610feffd88ff98_dir\MLSample$$anonfun$1.class
+[debug] 	MLSample$$anonfun$2$$anonfun$apply$2.class
+[debug] 	  E:\eclipse\workspace_new\workspace_scala\sbdsample\server\target\streams\$global\assemblyOption\$global\streams\assembly\6c3c6b2a160fe9dfd234c4e520610feffd88ff98_dir\MLSample$$anonfun$2$$anonfun$apply$2.class
+[debug] 	MLSample$$anonfun$2.class
+[debug] 	  E:\eclipse\workspace_new\workspace_scala\sbdsample\server\target\streams\$global\assemblyOption\$global\streams\assembly\6c3c6b2a160fe9dfd234c4e520610feffd88ff98_dir\MLSample$$anonfun$2.class
+[debug] 	MLSample$$anonfun$3$$anonfun$4.class
+[debug] 	  E:\eclipse\workspace_new\workspace_scala\sbdsample\server\target\streams\$global\assemblyOption\$global\streams\assembly\6c3c6b2a160fe9dfd234c4e520610feffd88ff98_dir\MLSample$$anonfun$3$$anonfun$4.class
+[debug] 	MLSample$$anonfun$3.class
+[debug] 	  E:\eclipse\workspace_new\workspace_scala\sbdsample\server\target\streams\$global\assemblyOption\$global\streams\assembly\6c3c6b2a160fe9dfd234c4e520610feffd88ff98_dir\MLSample$$anonfun$3.class
+[debug] 	MLSample$$anonfun$mlKMeans$1.class
+[debug] 	  E:\eclipse\workspace_new\workspace_scala\sbdsample\server\target\streams\$global\assemblyOption\$global\streams\assembly\6c3c6b2a160fe9dfd234c4e520610feffd88ff98_dir\MLSample$$anonfun$mlKMeans$1.class
+[debug] 	MLSample$$anonfun$mlKMeans$2.class
+[debug] 	  E:\eclipse\workspace_new\workspace_scala\sbdsample\server\target\streams\$global\assemblyOption\$global\streams\assembly\6c3c6b2a160fe9dfd234c4e520610feffd88ff98_dir\MLSample$$anonfun$mlKMeans$2.class
+[debug] 	MLSample$$anonfun$mlKMeans$3.class
+[debug] 	  E:\eclipse\workspace_new\workspace_scala\sbdsample\server\target\streams\$global\assemblyOption\$global\streams\assembly\6c3c6b2a160fe9dfd234c4e520610feffd88ff98_dir\MLSample$$anonfun$mlKMeans$3.class
+[debug] 	MLSample$$anonfun$mlKMeans$4.class
+[debug] 	  E:\eclipse\workspace_new\workspace_scala\sbdsample\server\target\streams\$global\assemblyOption\$global\streams\assembly\6c3c6b2a160fe9dfd234c4e520610feffd88ff98_dir\MLSample$$anonfun$mlKMeans$4.class
+[debug] 	MLSample$.class
+[debug] 	  E:\eclipse\workspace_new\workspace_scala\sbdsample\server\target\streams\$global\assemblyOption\$global\streams\assembly\6c3c6b2a160fe9dfd234c4e520610feffd88ff98_dir\MLSample$.class
+[debug] 	MLSample.class
+[debug] 	  E:\eclipse\workspace_new\workspace_scala\sbdsample\server\target\streams\$global\assemblyOption\$global\streams\assembly\6c3c6b2a160fe9dfd234c4e520610feffd88ff98_dir\MLSample.class
 [debug] 	Main$$anon$1.class
 [debug] 	  E:\eclipse\workspace_new\workspace_scala\sbdsample\server\target\streams\$global\assemblyOption\$global\streams\assembly\6c3c6b2a160fe9dfd234c4e520610feffd88ff98_dir\Main$$anon$1.class
 [debug] 	Main$$anonfun$1.class

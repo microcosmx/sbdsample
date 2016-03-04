@@ -80,7 +80,8 @@ object Main extends App {
         val sqlContext = new org.apache.spark.sql.hive.HiveContext(sc)
         val fs = initFileSystem(sc, cfg.slice("fs."))
         val jdbc = initJDBC(fs,cfg)
-        val env = Env(system, cfg, fs, jdbc, sc, sqlContext)
+        val ml = MLSample(sc)
+        val env = Env(system, cfg, fs, jdbc, ml, sc, sqlContext)
         
         
         //spark related processing sample
@@ -100,6 +101,10 @@ object Main extends App {
         tDF.registerTempTable("pltable")
         sqlContext.cacheTable("pltable")
         
+        
+        //machine learning
+        ml.mlexec()
+        //ml.mlKMeans()
         
         //http server actor
         system.actorOf(Props(classOf[Server], env).withRouter(RoundRobinPool(5)), name = "server")

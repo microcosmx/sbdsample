@@ -13,6 +13,7 @@ case class Env(
         cfg: Config,
         fs: FileSystem,
         db: JDBC,
+        ml: MLSample,
         sc: SparkContext,
         sqlContext: SQLContext)
 {

@@ -4,7 +4,7 @@
 		module="sbdsample_2.10"
 		revision="0.1-SNAPSHOT"
 		status="integration"
-		publication="20160302121845"
+		publication="20160303173325"
 	>
 		<description>
 		sbdsample
@@ -43,6 +43,7 @@
 		<dependency org="org.apache.spark" name="spark-core_2.10" rev="1.4.1" conf="provided->default(compile)"/>
 		<dependency org="org.apache.spark" name="spark-sql_2.10" rev="1.4.1" conf="provided->default(compile)"/>
 		<dependency org="org.apache.spark" name="spark-hive_2.10" rev="1.4.1" conf="provided->default(compile)"/>
+		<dependency org="org.apache.spark" name="spark-mllib_2.10" rev="1.4.1" conf="provided->default(compile)"/>
 		<dependency org="org.slf4j" name="slf4j-api" rev="1.7.5" conf="compile->default(compile)"/>
 		<dependency org="org.slf4j" name="slf4j-log4j12" rev="1.7.5" conf="compile->default(compile)"/>
 		<dependency org="org.scalatest" name="scalatest_2.10" rev="2.0" conf="test->default(compile)"/>
