@@ -102,6 +102,7 @@ object Main extends App {
         val tDF = makeDF(sc, sqlContext, "attributes")
         tDF.registerTempTable("pltable")
         sqlContext.cacheTable("pltable")
+        val tDF2 = sqlContext.sql("select * from pltable")
         
         println("---------dataframe---------------: ")
         tDF.show()
