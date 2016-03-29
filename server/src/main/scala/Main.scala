@@ -43,33 +43,6 @@ object Main extends App {
             cfg.get("database.password"))
     }
     
-    def makeDF(sc: SparkContext, sqlContext: org.apache.spark.sql.hive.HiveContext, path: String) = {
-          println(path)
-
-          val lines = sc.textFile(s"data/$path.txt").map(_.split(",", -1).map(_.trim)).collect
-          
-          val schema = StructType(lines.head.map(_.split(":").toSeq).map {
-              case Seq(name, "string")   => StructField(name, StringType)
-              case Seq(name, "integer")  => StructField(name, IntegerType)
-              case Seq(name, "double")   => StructField(name, DoubleType)
-              case Seq(name, "boolean")  => StructField(name, BooleanType)
-          })
-
-          val rows = lines.tail.map(cols => {
-              require(cols.size == schema.fields.size)
-              Row.fromSeq(cols zip schema map {
-                  case ("", StructField(_, _, true, _)) => null
-                  case (col, StructField(_, StringType,  _, _)) => col
-                  case (col, StructField(_, IntegerType, _, _)) => col.toInt
-                  case (col, StructField(_, DoubleType,  _, _)) => col.toDouble
-                  case (col, StructField(_, BooleanType, _, _)) => col.toBoolean
-              })
-          })
-
-          lazy val df = sqlContext.createDataFrame(sc.parallelize(rows), schema)
-          df
-      }
-
     override def main(args: Array[String]) {
         println(java.lang.management.ManagementFactory.getRuntimeMXBean.getName)
 
@@ -99,7 +72,7 @@ object Main extends App {
         println(textFile.first)
         val word_count = textFile.flatMap(line => line.split(",")).map(word => (word, 1)).reduceByKey(_+_)
         println(word_count.collect) 
-        val tDF = makeDF(sc, sqlContext, "attributes")
+        val tDF = Utils.makeDF(sc, sqlContext, "attributes")
         tDF.registerTempTable("pltable")
         sqlContext.cacheTable("pltable")
         val tDF2 = sqlContext.sql("select * from pltable")

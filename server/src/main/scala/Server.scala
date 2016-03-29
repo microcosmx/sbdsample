@@ -88,13 +88,14 @@ case class Server(env:Env) extends Actor with ActorLogging with HttpService {
             } ~
             path("getTables") {
                 //mysql database / user table
-                val result = env.db.fetch(env.sqlContext, "(select host,user,password from user) as u")
-                result.registerTempTable("user")
-                env.sqlContext.cacheTable("user")
-                sendDataFrame(result)
+//                val result = env.db.fetch(env.sqlContext, "(select host,user,password from user) as u")
+//                result.registerTempTable("user")
+//                env.sqlContext.cacheTable("user")
+//                sendDataFrame(result)
+                sendDataFrame(env.sqlContext.emptyDataFrame)
             }
         } ~
-        pathPrefix("admin") {        
+        pathPrefix("admin") {
             pathPrefix("sql") {
                 pathEnd {
                     complete {
