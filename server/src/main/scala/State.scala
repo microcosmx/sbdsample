@@ -15,10 +15,19 @@ case class mars_tianchi_songs(
     Gender:String
 )
 
+case class mars_tianchi_user_actions(
+    user_id:String, 
+    song_id:String, 
+    gmt_create:String,
+    action_type:String,
+    Ds:String
+)
+
+
 case class State(
     universe: Long = 0,
     generation: Long = -1,
     modificationTime: Long = -1)
 {
-    def makeId(prefix: String) = s"$prefix-1"
+    def makeId(prefix: String) = s"$prefix-0"
 }

@@ -74,6 +74,8 @@ class AliyunDataset extends FlatSpec with Matchers with BeforeAndAfterAll with T
         val env = Env(system, cfg, fs, jdbc, ml, sc, sqlContext)
 
         try{
+            import env.sqlContext.implicits._
+            
             val lines = sc.textFile("data/mars_tianchi_songs.csv").map(_.split(",", -1).map(_.trim)).collect
             val songs = lines
               .map( line =>
@@ -85,11 +87,24 @@ class AliyunDataset extends FlatSpec with Matchers with BeforeAndAfterAll with T
                   Language = line(4).toString, 
                   Gender = line(5).toString)
               ).toSeq
-            
-            import env.sqlContext.implicits._
             val songDF = env.sc.parallelize(songs).toDF
-            songDF.show()
             songDF.printSchema()
+            songDF.limit(10).show()
+            
+            //lines = sc.textFile("data/mars_tianchi_user_actions.csv").map(_.split(",", -1).map(_.trim)).collect
+            val ualines = sc.textFile("data/mars_tianchi_user_actions.csv").take(20).map(_.split(",", -1).map(_.trim))//.collect
+            val uacts = ualines
+              .map( line =>
+                mars_tianchi_user_actions(
+                  user_id = line(0).toString, 
+                  song_id = line(1).toString, 
+                  gmt_create = line(2).toString, 
+                  action_type = line(3).toString, 
+                  Ds = line(4).toString)
+              ).toSeq
+            val uactDF = env.sc.parallelize(uacts).toDF
+            uactDF.printSchema()
+            uactDF.limit(10).show()
         }
         catch {
             case t: Throwable =>
