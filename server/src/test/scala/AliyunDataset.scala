@@ -50,6 +50,7 @@ class AliyunDataset extends FlatSpec with Matchers with BeforeAndAfterAll with T
 
         val conf = new org.apache.spark.SparkConf
         conf.set("spark.master", "local[*]")
+        //conf.set("spark.master", "spark://192.168.20.17:7070")
         conf.set("spark.app.name", "Aliyun")
         conf.set("spark.ui.port", "55555")
         conf.set("spark.default.parallelism", "10")
