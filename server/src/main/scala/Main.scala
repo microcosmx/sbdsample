@@ -9,9 +9,10 @@ import org.apache.avro.file._
 import org.apache.avro.reflect._
 import org.apache.hadoop.fs._
 import org.apache.spark._
+import org.apache.spark.rdd._
 import org.apache.spark.sql._
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.types._
+import org.apache.spark.storage._
 import org.apache.spark.streaming._
 import scala.collection.JavaConversions._
 import scala.concurrent._
@@ -19,6 +20,7 @@ import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import spray.can.Http
 import spray.json._
+import DefaultJsonProtocol._
 
 object Main extends App {
     def initFileSystem(sc: SparkContext, props:Map[String,String]) = {
@@ -63,7 +65,7 @@ object Main extends App {
         import env.sqlContext.implicits._
         val a_rdd = sc.parallelize(Array(1,2,3,4,5))
         println("-----------rdd.count-------------: " + a_rdd.count)
-        val nDF = a_rdd.toDF("numberKey")
+        val nDF = a_rdd.toDF  //.toDF("numberKey")
         nDF.registerTempTable("ntable")
         sqlContext.cacheTable("ntable")
         

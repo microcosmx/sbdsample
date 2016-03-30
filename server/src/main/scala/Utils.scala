@@ -21,7 +21,8 @@ import spray.can.Http
 import spray.json._
 
 object Utils {
-	def makeDF(sc: SparkContext, sqlContext: org.apache.spark.sql.hive.HiveContext, path: String) = {
+	  
+    def makeDF(sc: SparkContext, sqlContext: org.apache.spark.sql.hive.HiveContext, path: String) = {
           println(path)
 
           val lines = sc.textFile(s"data/$path").map(_.split(",", -1).map(_.trim)).collect
@@ -47,5 +48,6 @@ object Utils {
           lazy val df = sqlContext.createDataFrame(sc.parallelize(rows), schema)
           df
       }
+    
 }
 
