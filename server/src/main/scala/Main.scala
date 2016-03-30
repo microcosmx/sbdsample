@@ -72,7 +72,7 @@ object Main extends App {
         println(textFile.first)
         val word_count = textFile.flatMap(line => line.split(",")).map(word => (word, 1)).reduceByKey(_+_)
         println(word_count.collect) 
-        val tDF = Utils.makeDF(sc, sqlContext, "attributes")
+        val tDF = Utils.makeDF(sc, sqlContext, "attributes.txt")
         tDF.registerTempTable("pltable")
         sqlContext.cacheTable("pltable")
         val tDF2 = sqlContext.sql("select * from pltable")
