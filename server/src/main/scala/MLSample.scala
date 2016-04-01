@@ -67,7 +67,7 @@ case class MLSample(
     
     def LinearRegressionTest() = {
       // Load and parse the data
-      val data = sc.textFile("data/mllib/ridge-data/lpsa.data",1)
+      val data = sc.textFile("data/lpsa.data",1)
       val parsedData = data.map { line =>
         val parts = line.split(',')
         LabeledPoint(parts(0).toDouble, Vectors.dense(parts(1).split(' ').map(_.toDouble)))
