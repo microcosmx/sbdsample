@@ -118,6 +118,13 @@ class AliyunDataset extends FlatSpec with Matchers with BeforeAndAfterAll with T
                   .select("artist_id", "Plays", "Ds")
                   
             result1.rdd.saveAsTextFile("data/mars_tianchi_artist_plays_predict")
+            //result1.rdd.repartition(1).saveAsTextFile("data/mars_tianchi_artist_plays_predict.csv")
+            //result1.rdd.coalesce(1,true).saveAsTextFile("data/mars_tianchi_artist_plays_predict.csv")
+            
+            //machine learning sample
+            val predictResult = env.ml.LinearRegressionTest()
+            predictResult.saveAsTextFile("data/linearResult")
+            
         }
         catch {
             case t: Throwable =>
