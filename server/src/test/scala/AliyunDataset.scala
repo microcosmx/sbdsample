@@ -77,7 +77,7 @@ class AliyunDataset extends FlatSpec with Matchers with BeforeAndAfterAll with T
         try{
             import env.sqlContext.implicits._
             
-            val lines = sc.textFile("data/mars_tianchi_songs.csv").map(_.split(",", -1).map(_.trim)).collect
+            val lines = env.sc.textFile("data/mars_tianchi_songs.csv").map(_.split(",", -1).map(_.trim)).collect
             val songs = lines
               .map( line =>
                 mars_tianchi_songs(
@@ -93,7 +93,7 @@ class AliyunDataset extends FlatSpec with Matchers with BeforeAndAfterAll with T
             songDF.limit(10).show()
             
             //lines = sc.textFile("data/mars_tianchi_user_actions.csv").map(_.split(",", -1).map(_.trim)).collect
-            val ualines = sc.textFile("data/mars_tianchi_user_actions.csv").take(20).map(_.split(",", -1).map(_.trim))//.collect
+            val ualines = env.sc.textFile("data/mars_tianchi_user_actions.csv").take(1000).map(_.split(",", -1).map(_.trim))//.collect
             val uacts = ualines
               .map( line =>
                 mars_tianchi_user_actions(
@@ -106,6 +106,18 @@ class AliyunDataset extends FlatSpec with Matchers with BeforeAndAfterAll with T
             val uactDF = env.sc.parallelize(uacts).toDF
             uactDF.printSchema()
             uactDF.limit(10).show()
+            
+            
+            //join
+            val result1 = songDF
+                  .join(uactDF, songDF("song_id") === uactDF("song_id"))
+                  .filter(songDF("publish_time") >= uactDF("Ds"))
+                  .groupBy(songDF("artist_id") as "artist_id", uactDF("Ds") as "Ds")
+                  .agg(count("action_type") as "Plays", max("song_init_plays") as "initCount")
+                  .sort("Ds")
+                  .select("artist_id", "Plays", "Ds")
+                  
+            result1.rdd.saveAsTextFile("data/mars_tianchi_artist_plays_predict")
         }
         catch {
             case t: Throwable =>
