@@ -112,6 +112,7 @@ class AliyunDataset extends FlatSpec with Matchers with BeforeAndAfterAll with T
             val result1 = songDF
                   .join(uactDF, songDF("song_id") === uactDF("song_id"))
                   .filter(songDF("publish_time") >= uactDF("Ds"))
+                  .filter(uactDF("action_type") === 1)
                   .groupBy(songDF("artist_id") as "artist_id", uactDF("Ds") as "Ds")
                   .agg(count("action_type") as "Plays", max("song_init_plays") as "initCount")
                   .sort("Ds")
