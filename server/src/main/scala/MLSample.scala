@@ -11,9 +11,16 @@ import org.apache.spark.mllib.linalg.Vectors
 import org.apache.spark.mllib.linalg.{Vector, Vectors}
 
 import org.apache.spark.mllib.regression.LabeledPoint
-import org.apache.spark.mllib.regression.LinearRegressionModel
-import org.apache.spark.mllib.regression.LinearRegressionWithSGD
+import org.apache.spark.mllib.regression.{LinearRegressionModel,RidgeRegressionModel,LassoModel}
+import org.apache.spark.mllib.regression.{RidgeRegressionWithSGD,LassoWithSGD,LinearRegressionWithSGD}
 import org.apache.spark.mllib.linalg.Vectors
+
+import org.apache.spark.mllib.classification.{LogisticRegressionWithLBFGS, LogisticRegressionModel}
+import org.apache.spark.mllib.evaluation.MulticlassMetrics
+import org.apache.spark.mllib.util.MLUtils
+
+import org.apache.spark.mllib.classification.{SVMModel, SVMWithSGD}
+import org.apache.spark.mllib.evaluation.BinaryClassificationMetrics
 
 
 case class MLSample(
@@ -65,18 +72,29 @@ case class MLSample(
     }
     
     
-    def LinearRegressionTest() = {
+    def LinearRegressionTest(result:DataFrame) = {
       // Load and parse the data
-      val data = sc.textFile("data/lpsa.data",1)
-      val parsedData = data.map { line =>
-        val parts = line.split(',')
-        LabeledPoint(parts(0).toDouble, Vectors.dense(parts(1).split(' ').map(_.toDouble)))
+//      val data = sc.textFile("data/lpsa.data",1)
+//      val parsedData = data.map { line =>
+//        val parts = line.split(',')
+//        LabeledPoint(parts(0).toDouble, Vectors.dense(parts(1).split(' ').map(_.toDouble)))
+//      }.cache()
+      
+      val parsedData = result.map { row => 
+//          val artist_id = row(0).toString().toDouble
+          val plays = row(1).toString().toDouble
+          val ds = row(2).toString().toDouble
+          LabeledPoint(plays, Vectors.dense(ds))
       }.cache()
       
+//      LinearRegressionWithSGD.train(input, numIterations, stepSize, miniBatchFraction, initialWeights)
+      
       // Building the model
-      val numIterations = 100
+      val numIterations = 1000
       val stepSize = 0.00000001
       val model = LinearRegressionWithSGD.train(parsedData, numIterations, stepSize)
+      val model1 = RidgeRegressionWithSGD.train(parsedData, numIterations);//L2
+      val model2 = LassoWithSGD.train(parsedData, numIterations);//L1
       
       // Evaluate model on training examples and compute training error
       val valuesAndPreds = parsedData.map { point =>
@@ -94,5 +112,80 @@ case class MLSample(
       //val sameModel = LinearRegressionModel.load(sc, "myModelPath")
       
       valuesAndPreds
+    }
+    
+    
+    def LogisticRegressionTest(result:DataFrame) = {
+      // Load training data in LIBSVM format.
+      val data = MLUtils.loadLibSVMFile(sc, "data/mllib/sample_libsvm_data.txt")
+      
+//      val data = result.map { row => 
+////        val artist_id = row(0).toString().toDouble
+//          val plays = row(1).toString().toDouble
+//          val ds = row(2).toString().toDouble
+//          LabeledPoint(plays, Vectors.dense(ds))
+//      }.cache()
+
+      // Split data into training (60%) and test (40%).
+      val splits = data.randomSplit(Array(0.6, 0.4), seed = 11L)
+      val training = splits(0).cache()
+      val test = splits(1)
+
+      // Run training algorithm to build the model
+      val model = new LogisticRegressionWithLBFGS()
+        .setNumClasses(10)
+        .run(training)
+
+      // Compute raw scores on the test set.
+      val predictionAndLabels = test.map { case LabeledPoint(label, features) =>
+        val prediction = model.predict(features)
+        (prediction, label)
+      }
+
+      // Get evaluation metrics.
+      val metrics = new MulticlassMetrics(predictionAndLabels)
+      val precision = metrics.precision
+      println("Precision = " + precision)
+
+      // Save and load model
+//      model.save(sc, "myModelPath")
+//      val sameModel = LogisticRegressionModel.load(sc, "myModelPath")
+      predictionAndLabels
+    }
+    
+    //Linear Support Vector Machines
+    def LinearSVM(result:DataFrame)={
+      // Load training data in LIBSVM format.
+      val data = MLUtils.loadLibSVMFile(sc, "data/mllib/sample_libsvm_data.txt")
+
+      // Split data into training (60%) and test (40%).
+      val splits = data.randomSplit(Array(0.6, 0.4), seed = 11L)
+      val training = splits(0).cache()
+      val test = splits(1)
+
+      // Run training algorithm to build the model
+      val numIterations = 100
+      val model = SVMWithSGD.train(training, numIterations)
+
+      // Clear the default threshold.
+      model.clearThreshold()
+
+      // Compute raw scores on the test set.
+      val scoreAndLabels = test.map { point =>
+        val score = model.predict(point.features)
+        (score, point.label)
+      }
+
+      // Get evaluation metrics.
+      val metrics = new BinaryClassificationMetrics(scoreAndLabels)
+      val auROC = metrics.areaUnderROC()
+
+      println("Area under ROC = " + auROC)
+
+//      // Save and load model
+//      model.save(sc, "myModelPath")
+//      val sameModel = SVMModel.load(sc, "myModelPath")
+      scoreAndLabels
+      
     }
 }

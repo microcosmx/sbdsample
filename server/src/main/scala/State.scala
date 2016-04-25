@@ -23,6 +23,12 @@ case class mars_tianchi_user_actions(
     Ds:String
 )
 
+case class artistId_plays_ds(
+    artist_id:String,
+    Plays:String,
+    Ds:String
+)
+
 
 case class State(
     universe: Long = 0,
