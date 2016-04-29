@@ -56,7 +56,7 @@ object Main extends App {
         val sqlContext = new org.apache.spark.sql.hive.HiveContext(sc)
         val fs = initFileSystem(sc, cfg.slice("fs."))
         val jdbc = initJDBC(fs,cfg)
-        val ml = MLSample(sc)
+        val ml = MLSample(sc,sqlContext)
         val ss = SStream(sc)
         val env = Env(system, cfg, fs, jdbc, ml, sc, sqlContext)
         

@@ -24,7 +24,8 @@ import org.apache.spark.mllib.evaluation.BinaryClassificationMetrics
 
 
 case class MLSample(
-    sc: SparkContext)
+    sc: SparkContext,
+    sqlContext: SQLContext)
 {
     def mlexec() = {
       // Create a dense vector (1.0, 0.0, 3.0).
@@ -72,6 +73,72 @@ case class MLSample(
     }
     
     
+    def LinearRegressionTest1() = {
+      // Load and parse the data
+      val data = sc.textFile("data/lpsa1.data")
+      val parsedData = data.map { line =>
+        val parts = line.split(',')
+        LabeledPoint(parts(0).toDouble, Vectors.dense(parts(1).split(' ').map(_.toDouble)))
+      }.cache()
+      
+      // Building the model
+      val numIterations = 100000
+      val stepSize = 0.1
+      val model = LinearRegressionWithSGD.train(parsedData, numIterations, stepSize)
+      
+      //data 2 for predict
+      val data2 = sc.textFile("data/lpsa2.data")
+      val parsedData2 = data2.map { line =>
+        val parts = line.split(',')
+        LabeledPoint(parts(0).toDouble, Vectors.dense(parts(1).split(' ').map(_.toDouble)))
+      }.cache()
+      // Evaluate model on training examples and compute training error
+      val valuesAndPreds = parsedData2.map { point =>
+        val prediction = model.predict(point.features)
+        (point.label, prediction)
+      }
+      
+      import spray.json._
+      import DefaultJsonProtocol._
+      println("------------------predict-----------------")
+      println(valuesAndPreds.collect.toJson)
+      println("------------------means-----------------")
+      val MSE = valuesAndPreds.map{case(v, p) => math.pow((v - p), 2)}.mean()
+      println("training Mean Squared Error = " + MSE)
+      
+      // Save and load model
+      //model.save(sc, "myModelPath")
+      //val sameModel = LinearRegressionModel.load(sc, "myModelPath")
+    }
+    
+    def LinearRegressionTest2() = {
+      import org.apache.spark.ml.regression.LinearRegression
+
+      // Load training data
+      val training = sqlContext.read.format("libsvm")
+        .load("data/mllib/sample_linear_regression_data.txt")
+      
+      val lr = new LinearRegression()
+        .setMaxIter(10)
+        .setRegParam(0.3)
+        .setElasticNetParam(0.8)
+      
+      // Fit the model
+      val lrModel = lr.fit(training)
+      
+      // Print the coefficients and intercept for linear regression
+      println(s"Coefficients: ${lrModel.coefficients} Intercept: ${lrModel.intercept}")
+      
+      // Summarize the model over the training set and print out some metrics
+      val trainingSummary = lrModel.summary
+      println(s"numIterations: ${trainingSummary.totalIterations}")
+      println(s"objectiveHistory: ${trainingSummary.objectiveHistory.toList}")
+      trainingSummary.residuals.show()
+      println(s"RMSE: ${trainingSummary.rootMeanSquaredError}")
+      println(s"r2: ${trainingSummary.r2}")
+    }
+    
+    
     def LinearRegressionTest(result:DataFrame) = {
       // Load and parse the data
 //      val data = sc.textFile("data/lpsa.data",1)
@@ -84,14 +151,14 @@ case class MLSample(
 //          val artist_id = row(0).toString().toDouble
           val plays = row(1).toString().toDouble
           val ds = row(2).toString().toDouble
-          LabeledPoint(plays, Vectors.dense(ds))
+          LabeledPoint(plays, Vectors.dense(Array(ds)))
       }.cache()
       
 //      LinearRegressionWithSGD.train(input, numIterations, stepSize, miniBatchFraction, initialWeights)
       
       // Building the model
       val numIterations = 1000
-      val stepSize = 0.00000001
+      val stepSize = 0.001
       val model = LinearRegressionWithSGD.train(parsedData, numIterations, stepSize)
       val model1 = RidgeRegressionWithSGD.train(parsedData, numIterations);//L2
       val model2 = LassoWithSGD.train(parsedData, numIterations);//L1
@@ -101,8 +168,12 @@ case class MLSample(
         val prediction = model.predict(point.features)
         (point.label, prediction)
       }
+      
+      import spray.json._
+      import DefaultJsonProtocol._
       println("------------------predict-----------------")
-      println(valuesAndPreds)
+      println(valuesAndPreds.collect.toJson)
+      println("------------------means-----------------")
       
       val MSE = valuesAndPreds.map{case(v, p) => math.pow((v - p), 2)}.mean()
       println("training Mean Squared Error = " + MSE)

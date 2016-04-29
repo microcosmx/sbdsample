@@ -77,7 +77,7 @@ class AliyunDataset extends FlatSpec with Matchers with BeforeAndAfterAll with T
         val cfg = new Config("conf/server.properties")
         
         val jdbc = null
-        val ml = MLSample(sc)
+        val ml = MLSample(sc,sqlContext)
         val ss = SStream(sc)
         val env = Env(system, cfg, fs, jdbc, ml, sc, sqlContext)
 
@@ -138,7 +138,7 @@ class AliyunDataset extends FlatSpec with Matchers with BeforeAndAfterAll with T
             //join
             val result1 = songDF
                   .join(uactDF, songDF("song_id") === uactDF("song_id"))
-                  .filter(songDF("publish_time") >= uactDF("Ds"))
+                  //.filter(songDF("publish_time") >= uactDF("Ds"))
                   .filter(uactDF("action_type") === 1)
                   .groupBy(songDF("artist_id") as "artist_id", uactDF("Ds") as "Ds")
                   .agg(count("action_type") as "Plays", max("song_init_plays") as "initCount")
@@ -175,12 +175,12 @@ class AliyunDataset extends FlatSpec with Matchers with BeforeAndAfterAll with T
             val tmp1 = sqlContext.createDataFrame(tmp0, schema)
              tmp1.printSchema()
              tmp1.show()
-             tmp1.rdd.saveAsTextFile("data/mars_tianchi_artist_plays_predict")
+             //tmp1.rdd.saveAsTextFile("data/mars_tianchi_artist_plays_predict")
             
   
             //machine learning sample
             val predictResult = env.ml.LinearRegressionTest(tmp1)
-            predictResult.saveAsTextFile("data/linearResult")
+            //predictResult.saveAsTextFile("data/linearResult")
             
 //             val predictResult2 = env.ml.LogisticRegressionTest(tmp1)
 //             predictResult2.saveAsTextFile("data/logisticResult")
