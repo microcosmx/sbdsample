@@ -2,4 +2,5 @@
 sbt 
 test-only AliyunDataset
 test-only SparkTestcase
+test-only H2OTestcase
 pause
