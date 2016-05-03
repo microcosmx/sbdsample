@@ -19,7 +19,9 @@ libraryDependencies ++= Seq(
   	"org.apache.spark" %% "spark-streaming-flume" % "1.6.1" % "provided",
   	"org.apache.spark" %% "spark-repl" % "1.6.1" % "provided",
   	
-  	//"ai.h2o" %% "sparkling-water-repl_2.10" % "1.6.3" % "provided",
+  	"ai.h2o" %% "sparkling-water-core" % "1.6.3" % "provided",
+  	"ai.h2o" %% "sparkling-water-repl" % "1.6.3" % "provided",
+  	"ai.h2o" %% "sparkling-water-examples" % "1.6.3" % "provided",
     
     "org.slf4j" % "slf4j-api" % "1.7.5",
     "org.slf4j" % "slf4j-log4j12" % "1.7.5",
