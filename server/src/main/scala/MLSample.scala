@@ -27,6 +27,105 @@ case class MLSample(
     sc: SparkContext,
     sqlContext: SQLContext)
 {
+  
+    def mlLinear() = {
+      import org.apache.spark.ml.regression.LinearRegression
+
+      // Load training data
+      val training = sqlContext.read.format("libsvm")
+        //.load("data/mllib/sample_linear_regression_data.txt")
+        .load("data/lpsa3.data")
+        
+      training.show()
+      
+      val lr = new LinearRegression()
+        .setMaxIter(100)
+        //.setRegParam(0.3)
+        .setElasticNetParam(0.8)
+      
+      // Fit the model
+      val lrModel = lr.fit(training)
+      
+      //prediction
+      val predictions = lrModel.transform(training)
+      println("------------predictions----------------")
+      predictions.show()
+      
+      //cross-validation
+      val Array(trainingData, testData) = training.randomSplit(Array(0.8, 0.2))
+      val lr2 = new LinearRegression()
+        .setMaxIter(100)
+        .setRegParam(0.3)
+        .setElasticNetParam(0.8)
+      val lrModel2 = lr2.fit(trainingData)
+      val predictions2 = lrModel2.transform(testData)
+      println("-------------predictions 2---------------")
+      predictions2.show()
+      
+      // Print the coefficients and intercept for linear regression
+      println(s"Coefficients: ${lrModel.coefficients} Intercept: ${lrModel.intercept}")
+      
+      // Summarize the model over the training set and print out some metrics
+      val trainingSummary = lrModel.summary
+      println(s"numIterations: ${trainingSummary.totalIterations}")
+      println(s"objectiveHistory: ${trainingSummary.objectiveHistory.toList}")
+      trainingSummary.residuals.show()
+      println(s"RMSE: ${trainingSummary.rootMeanSquaredError}")
+      println(s"r2: ${trainingSummary.r2}")
+      
+    }
+    
+    def mlDTree() = {
+      import org.apache.spark.ml.Pipeline
+      import org.apache.spark.ml.regression.DecisionTreeRegressor
+      import org.apache.spark.ml.regression.DecisionTreeRegressionModel
+      import org.apache.spark.ml.feature.VectorIndexer
+      import org.apache.spark.ml.evaluation.RegressionEvaluator
+      
+      // Load the data stored in LIBSVM format as a DataFrame.
+      val data = sqlContext.read.format("libsvm").load("data/mllib/sample_libsvm_data.txt")
+      
+      // Automatically identify categorical features, and index them.
+      // Here, we treat features with > 4 distinct values as continuous.
+      val featureIndexer = new VectorIndexer()
+        .setInputCol("features")
+        .setOutputCol("indexedFeatures")
+        .setMaxCategories(4)
+        .fit(data)
+      
+      // Split the data into training and test sets (30% held out for testing)
+      val Array(trainingData, testData) = data.randomSplit(Array(0.7, 0.3))
+      
+      // Train a DecisionTree model.
+      val dt = new DecisionTreeRegressor()
+        .setLabelCol("label")
+        .setFeaturesCol("indexedFeatures")
+      
+      // Chain indexer and tree in a Pipeline
+      val pipeline = new Pipeline()
+        .setStages(Array(featureIndexer, dt))
+      
+      // Train model.  This also runs the indexer.
+      val model = pipeline.fit(trainingData)
+      
+      // Make predictions.
+      val predictions = model.transform(testData)
+      
+      // Select example rows to display.
+      predictions.select("prediction", "label", "features").show(5)
+      
+      // Select (prediction, true label) and compute test error
+      val evaluator = new RegressionEvaluator()
+        .setLabelCol("label")
+        .setPredictionCol("prediction")
+        .setMetricName("rmse")
+      val rmse = evaluator.evaluate(predictions)
+      println("Root Mean Squared Error (RMSE) on test data = " + rmse)
+      
+      val treeModel = model.stages(1).asInstanceOf[DecisionTreeRegressionModel]
+      println("Learned regression tree model:\n" + treeModel.toDebugString)
+    }
+    
     def mlexec() = {
       // Create a dense vector (1.0, 0.0, 3.0).
       val dv: Vector = Vectors.dense(1.0, 0.0, 3.0)

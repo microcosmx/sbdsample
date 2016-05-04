@@ -84,7 +84,9 @@ class SparkTestcase extends FlatSpec with Matchers with BeforeAndAfterAll with T
         try{
             import env.sqlContext.implicits._
             
-            env.ml.LinearRegressionTest1()
+            //env.ml.LinearRegressionTest1()
+            //env.ml.mlLinear()
+            env.ml.mlDTree()
             
             
         }
