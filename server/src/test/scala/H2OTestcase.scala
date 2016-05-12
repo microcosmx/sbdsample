@@ -85,19 +85,51 @@ class H2OTestcase extends FlatSpec with Matchers with BeforeAndAfterAll with Tes
             import org.apache.spark.h2o._
             import org.apache.spark.examples.h2o._
             val h2oContext = H2OContext.getOrCreate(sc)
-            val path = "data/examples/smalldata/prostate.csv"
+            val path = "data/examples/smalldata/test.csv"
             val prostateText = sc.textFile(path)
-            val prostateRDD = prostateText.map(_.split(",")).map(row => ProstateParse(row))
-            import _root_.hex.tree.gbm.GBM
-            import _root_.hex.tree.gbm.GBMModel.GBMParameters
-            import h2oContext._
-            val train: H2OFrame = h2oContext.asH2OFrame(prostateRDD)
-            val gbmParams = new GBMParameters()
-            gbmParams._train = train.key
-            gbmParams._response_column = "CAPSULE"
-            gbmParams._ntrees = 10
-            val gbmModel = new GBM(gbmParams).trainModel.get
+            val prostateRDD = prostateText.map(_.split(",")).map(row => Row(row(0).toDouble,row(1).toDouble))
+            val schemaString = "y x"
+            import org.apache.spark.sql.types._
+            val schema = StructType(schemaString.split(" ").map(fieldName=>StructField(fieldName,DoubleType,true)))
+            val df = sqlContext.createDataFrame(prostateRDD, schema)
             
+            
+            import h2oContext._
+            val train: H2OFrame = h2oContext.asH2OFrame(df,  Some("h2oframe"))
+            println(train.toString())
+//            
+//            import _root_.hex.tree.gbm.GBM
+//            import _root_.hex.tree.gbm.GBMModel.GBMParameters
+//            val gbmParams = new GBMParameters()
+//            gbmParams._train = train.key
+//            gbmParams._response_column = "CAPSULE"
+//            gbmParams._ntrees = 10
+//            val gbmModel = new GBM(gbmParams).trainModel.get
+//            println("---------------->print Model")
+//            println(gbmModel)
+//            println("---------------->print End")
+            
+            //Gamma Models
+            import _root_.hex.glm.{ComputationState,GLM,GLMMetricBuilder,GLMModel,GLMScore,GLMTask}
+            import _root_.hex.glm.GLMModel.GLMParameters
+            import _root_.hex.glm.GLMModel.GLMParameters._
+            var glmParams = new GLMParameters()
+            glmParams._family = Family.gamma
+            glmParams._link = Link.family_default
+            glmParams._train = train.key
+            glmParams._response_column = "y"
+            glmParams._lambda_search = true
+//            glmParams._compute_p_values = true
+            glmParams._remove_collinear_columns = true
+//            glmParams.
+            var glmModel = new GLM(glmParams).trainModel().get
+
+            println("---------------->print Model")
+            println(glmModel)
+            println("---------------->print End")
+
+            
+
         }
         catch {
             case t: Throwable =>

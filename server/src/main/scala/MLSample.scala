@@ -1,4 +1,3 @@
-
 import java.lang._
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd._
@@ -75,7 +74,7 @@ case class MLSample(
       
     }
     
-    def mlDTree() = {
+    def mlDTree(data:DataFrame,trainingData:DataFrame,testData:DataFrame) = {
       import org.apache.spark.ml.Pipeline
       import org.apache.spark.ml.regression.DecisionTreeRegressor
       import org.apache.spark.ml.regression.DecisionTreeRegressionModel
@@ -83,8 +82,8 @@ case class MLSample(
       import org.apache.spark.ml.evaluation.RegressionEvaluator
       
       // Load the data stored in LIBSVM format as a DataFrame.
-      val data = sqlContext.read.format("libsvm").load("data/mllib/sample_libsvm_data.txt")
-      
+//      val data = sqlContext.read.format("libsvm").load("data/mllib/sample_libsvm_data.txt")
+ 
       // Automatically identify categorical features, and index them.
       // Here, we treat features with > 4 distinct values as continuous.
       val featureIndexer = new VectorIndexer()
@@ -94,7 +93,7 @@ case class MLSample(
         .fit(data)
       
       // Split the data into training and test sets (30% held out for testing)
-      val Array(trainingData, testData) = data.randomSplit(Array(0.7, 0.3))
+//      val Array(trainingData, testData) = data.randomSplit(Array(0.7, 0.3))
       
       // Train a DecisionTree model.
       val dt = new DecisionTreeRegressor()
@@ -112,7 +111,7 @@ case class MLSample(
       val predictions = model.transform(testData)
       
       // Select example rows to display.
-      predictions.select("prediction", "label", "features").show(5)
+      predictions.select("prediction", "label", "features").show(20)
       
       // Select (prediction, true label) and compute test error
       val evaluator = new RegressionEvaluator()
@@ -307,10 +306,10 @@ case class MLSample(
       
       // Building the model
       val numIterations = 1000
-      val stepSize = 0.001
+      val stepSize = 0.0001
       val model = LinearRegressionWithSGD.train(parsedData, numIterations, stepSize)
-      val model1 = RidgeRegressionWithSGD.train(parsedData, numIterations);//L2
-      val model2 = LassoWithSGD.train(parsedData, numIterations);//L1
+//      val model1 = RidgeRegressionWithSGD.train(parsedData, numIterations);//L2
+//      val model2 = LassoWithSGD.train(parsedData, numIterations);//L1
       
       // Evaluate model on training examples and compute training error
       val valuesAndPreds = parsedData.map { point =>
@@ -318,11 +317,11 @@ case class MLSample(
         (point.label, prediction)
       }
       
-      import spray.json._
-      import DefaultJsonProtocol._
-      println("------------------predict-----------------")
-      println(valuesAndPreds.collect.toJson)
-      println("------------------means-----------------")
+//      import spray.json._
+//      import DefaultJsonProtocol._
+//      println("------------------predict-----------------")
+//      println(valuesAndPreds.collect.toJson)
+//      println("------------------means-----------------")
       
       val MSE = valuesAndPreds.map{case(v, p) => math.pow((v - p), 2)}.mean()
       println("training Mean Squared Error = " + MSE)
