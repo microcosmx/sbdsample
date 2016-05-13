@@ -175,7 +175,6 @@ case class MLSample(
       println("Learned regression forest model:\n" + rfModel.toDebugString)
     }
     
-    
     def mlexec() = {
       // Create a dense vector (1.0, 0.0, 3.0).
       val dv: Vector = Vectors.dense(1.0, 0.0, 3.0)
