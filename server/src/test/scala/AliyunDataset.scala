@@ -273,6 +273,7 @@ class AliyunDataset extends FlatSpec with Matchers with BeforeAndAfterAll with T
                 )
            
            }
+           
            val data2 = sc.parallelize(dataRDD.collect().toSeq).toDF
            val trainingData = sc.parallelize(trainingRDD.collect().toSeq).toDF
            val testData = sc.parallelize(testRDD.collect().toSeq).toDF

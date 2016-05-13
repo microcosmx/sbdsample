@@ -24,6 +24,7 @@ case class mars_tianchi_user_actions(
     Ds:String
 )
 
+
 case class artistId_plays_ds(
     artist_id:String,
     Plays:Double,
