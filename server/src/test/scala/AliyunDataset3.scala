@@ -100,9 +100,9 @@ class AliyunDataset3 extends FlatSpec with Matchers with BeforeAndAfterAll with 
                   Language = line(4).toString, 
                   Gender = line(5).toString)
               ).toSeq
-            var songDF = env.sc.parallelize(songs).toDF
-            songDF.printSchema()
-            songDF.limit(10).show()
+            val songDF_base = env.sc.parallelize(songs).toDF
+            songDF_base.printSchema()
+            songDF_base.limit(10).show()
  
             val mtua = env.sc.textFile("data/mars_tianchi_user_actions.csv")
             val mtua_rdd = mtua.map(_.split(",", -1).map(_.trim)).map { line =>
@@ -124,7 +124,7 @@ class AliyunDataset3 extends FlatSpec with Matchers with BeforeAndAfterAll with 
            //filter
            val artist_id_ = "03c6699ea836decbc5c8fc2dbae7bd3b"
            
-           songDF = songDF.filter(songDF("artist_id") === artist_id_)
+           val songDF = songDF_base.filter(songDF_base("artist_id") === artist_id_)
             val result1 = songDF
                   .join(uactDF, songDF("song_id") === uactDF("song_id"))
                   //.filter(songDF("publish_time") >= uactDF("Ds"))
@@ -325,8 +325,9 @@ class AliyunDataset3 extends FlatSpec with Matchers with BeforeAndAfterAll with 
                case Row(predic: String) =>
                   //println(predic)
                case Row(predic: Double) =>
-                 val dss = sdf.format(cal.getTime())
-                  writer.println(s"$artist_id_,$predic,$dss")
+                 val ds_ = sdf.format(cal.getTime())
+                 val predic_ = Math.floor(predic).toInt
+                  writer.println(s"$artist_id_,$predic_,$ds_")
                   cal.add(Calendar.DATE, 1)
                case _ => 
             }
