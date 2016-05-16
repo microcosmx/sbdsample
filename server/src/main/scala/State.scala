@@ -29,7 +29,11 @@ case class artistId_plays_ds(
     Plays:Double,
     Downloads:Double,
     Favors:Double,
-    Ds:Double
+    Ds:Double,
+    initCount:Double,
+    pubDate:Double,
+    lang:Double,
+    gender:Double
 )
 
 case class params(

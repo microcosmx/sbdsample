@@ -26,8 +26,10 @@ import scala.annotation._
 import scala.math.Ordered.orderingToOrdered
 import scala.math.Ordering.Implicits._
 import scala.util.hashing._
+import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.Calendar
 import org.apache.spark.mllib.classification.{SVMModel,SVMWithSGD}
 import org.apache.spark.mllib.evaluation.BinaryClassificationMetrics
 import org.apache.spark.mllib.util.MLUtils
@@ -87,8 +89,6 @@ class AliyunDataset3 extends FlatSpec with Matchers with BeforeAndAfterAll with 
             import env.sqlContext.implicits._
             
             val lines = env.sc.textFile("data/mars_tianchi_songs.csv")
-            .filter { line => 
-              line.contains("03c6699ea836decbc5c8fc2dbae7bd3b")}
             .map(_.split(",", -1).map(_.trim)).collect
             val songs = lines
               .map( line =>
@@ -100,7 +100,7 @@ class AliyunDataset3 extends FlatSpec with Matchers with BeforeAndAfterAll with 
                   Language = line(4).toString, 
                   Gender = line(5).toString)
               ).toSeq
-            val songDF = env.sc.parallelize(songs).toDF
+            var songDF = env.sc.parallelize(songs).toDF
             songDF.printSchema()
             songDF.limit(10).show()
  
@@ -121,29 +121,216 @@ class AliyunDataset3 extends FlatSpec with Matchers with BeforeAndAfterAll with 
            // 1 for plays
            // 2 for downloads
            // 3 for favors
+           //filter
+           val artist_id_ = "03c6699ea836decbc5c8fc2dbae7bd3b"
+           
+           songDF = songDF.filter(songDF("artist_id") === artist_id_)
             val result1 = songDF
                   .join(uactDF, songDF("song_id") === uactDF("song_id"))
                   //.filter(songDF("publish_time") >= uactDF("Ds"))
                   .filter(uactDF("action_type") === 1)
                   .groupBy(songDF("artist_id") as "artist_id", uactDF("Ds") as "Ds")
-                  .agg(count("action_type") as "Plays", max("song_init_plays") as "initCount",max("publish_time") as "pub_date")
+                  .agg(count("action_type") as "Plays", avg("song_init_plays") as "initCount", max("publish_time") as "pubDate", avg("Language") as "lang", avg("Gender") as "gender")
                   .sort("Ds").sort("artist_id")
-                  .select("artist_id","Plays","Ds", "initCount","pub_date")
+                  .select("artist_id","Plays","Ds","initCount", "pubDate","lang","gender")
                   .sort("Ds")
 
 //              result1.printSchema()
 //              result1.show()
               
+             val result2 = songDF
+                  .join(uactDF, songDF("song_id") === uactDF("song_id"))
+                  //.filter(songDF("publish_time") >= uactDF("Ds"))
+                  .filter(uactDF("action_type") === 2)
+                  .groupBy(songDF("artist_id") as "artist_id", uactDF("Ds") as "Ds")
+                  .agg(count("action_type") as "Downloads")
+                  .sort("Ds").sort("artist_id")
+                  .select("Downloads","Ds")
+                  .withColumnRenamed("Ds", "Ds2")
+                  .sort("Ds2")
+                  
+//              result2.printSchema()
+//              result2.show()
+              
+              val result3 = songDF
+                  .join(uactDF, songDF("song_id") === uactDF("song_id"))
+                  //.filter(songDF("publish_time") >= uactDF("Ds"))
+                  .filter(uactDF("action_type") === 3)
+                  .groupBy(songDF("artist_id") as "artist_id", uactDF("Ds") as "Ds")
+                  .agg(count("action_type") as "Favors")
+                  .sort("Ds").sort("artist_id")
+                  .select("Favors","Ds")
+                  .withColumnRenamed("Ds", "Ds3")
+                  .sort("Ds3")
+                  
+//              result3.printSchema()
+//              result3.show()
+              
+              val agg_result = result1
+              .join(result2, result1("Ds")===result2("Ds2"),"left_outer")
+              .join(result3, result1("Ds")===result3("Ds3"),"left_outer") 
+              .sort("Ds")
+              .select(
+                  "artist_id",
+                  "Plays",
+                  "Downloads",
+                  "Favors",
+                  "Ds",
+                  "initCount",
+                  "pubDate",
+                  "lang",
+                  "gender")
+              agg_result.printSchema()
+              agg_result.show()
           
 
             
-            result1.rdd.saveAsTextFile("data/mars_tianchi_artist_plays_predict")
+//            result1.rdd.saveAsTextFile("data/mars_tianchi_artist_plays_predict")
             //result1.rdd.repartition(1).saveAsTextFile("data/mars_tianchi_artist_plays_predict.csv")
             //result1.rdd.coalesce(1,true).saveAsTextFile("data/mars_tianchi_artist_plays_predict.csv")
             
-            //env.ml.LinearRegressionTest(result1)
+            //translate  date to num   
+            import org.apache.spark.mllib.linalg.{Vector, Vectors}
+            val tmp0 = agg_result.map { row => 
+                val artist_id = row.get(0).toString()
+                val plays = row.get(1).toString().toDouble
+                val downloads = row.get(2).toString().toDouble
+                var favors:Double = 0
+                if(row.get(3) == null)
+                 favors = 0
+                else
+                  favors = row.get(3).toString().toDouble
+                
+                val ds = row.get(4).toString()
+                val initCount = row.get(5).toString().toDouble
+                val pubDate = row.get(6).toString()
+                val lang = row.get(7).toString().toDouble
+                val gender = row.get(8).toString().toDouble
+                
+                //count the number of days since 2015-03-01
+                val sdf=new SimpleDateFormat("yyyyMMdd")
+                
+                val begin = sdf.parse("20150301")
+                val end = sdf.parse(ds)
+                val between:Long=(end.getTime-begin.getTime)/1000
+                val hour:Float=between.toFloat/3600
+                val days:Long = hour.toLong/24
+                
+                val end_pub = sdf.parse(pubDate)
+                val between_pub:Long=(end_pub.getTime-begin.getTime)/1000
+                val hour_pub:Float=between_pub.toFloat/3600
+                val days_pub:Long = hour_pub.toLong/24
+                
+                artistId_plays_ds(
+                    artist_id= artist_id,
+                    Plays= plays,
+                    Downloads = downloads,
+                    Favors= favors,
+                    Ds=days.toDouble,
+                    initCount=initCount,
+                    pubDate=days_pub.toDouble,
+                    lang=lang,
+                    gender=gender
+                )
+                
+              }
+          
+           val seq = tmp0.collect().toSeq
+           val data = sc.parallelize(seq).toDF
            
-
+           val dataRDD = data.map { row => 
+                val artist_id = row.get(0).toString()
+                val plays = row.get(1).toString().toDouble
+                val downloads = row.get(2).toString().toDouble
+                val favors = row.get(3).toString().toDouble
+                val ds = row.get(4).toString().toDouble
+                val initCount = row.get(5).toString().toDouble
+                val pubDate = row.get(6).toString().toDouble
+                val lang = row.get(7).toString().toDouble
+                val gender = row.get(8).toString().toDouble
+                
+                val label = plays
+                val features = Vectors.dense(Array(downloads,favors,ds,initCount,pubDate,lang,gender))
+                params(
+                  label=label,
+                  features=features
+                )
+           
+           }
+           
+//           data.printSchema()
+//           data.show()
+           
+           val trainingRDD = data.filter(data("Ds")<180).map { row => 
+                val artist_id = row.get(0).toString()
+                val plays = row.get(1).toString().toDouble
+                val downloads = row.get(2).toString().toDouble
+                val favors = row.get(3).toString().toDouble
+                val ds = row.get(4).toString().toDouble
+                val initCount = row.get(5).toString().toDouble
+                val pubDate = row.get(6).toString().toDouble
+                val lang = row.get(7).toString().toDouble
+                val gender = row.get(8).toString().toDouble
+                
+                val label = plays
+                val features = Vectors.dense(Array(downloads,favors,ds,initCount,pubDate,lang,gender))
+                params(
+                  label=label,
+                  features=features
+                )
+           
+           }
+           
+           val testRDD = data.filter("Ds % 3 = 0").map { row => 
+                val artist_id = row.get(0).toString()
+                val plays = row.get(1).toString().toDouble
+                val downloads = row.get(2).toString().toDouble
+                val favors = row.get(3).toString().toDouble
+                val ds = row.get(4).toString().toDouble
+                val initCount = row.get(5).toString().toDouble
+                val pubDate = row.get(6).toString().toDouble
+                val lang = row.get(7).toString().toDouble
+                val gender = row.get(8).toString().toDouble
+                
+                val label = plays
+                val features = Vectors.dense(Array(downloads,favors,ds,initCount,pubDate,lang,gender))
+                params(
+                  label=label,
+                  features=features
+                )
+           
+           }
+           val data2 = sc.parallelize(dataRDD.collect().toSeq).toDF
+           val trainingData = sc.parallelize(trainingRDD.collect().toSeq).toDF
+           val testData = sc.parallelize(testRDD.collect().toSeq).toDF
+           
+           data2.printSchema()
+           data2.show()
+           
+           
+           val predictions = env.ml.mlDTree(data2,trainingData,testData)
+           println("-----------result-------------")
+           predictions.printSchema()
+           predictions.select("prediction", "label", "features").show(100)
+           
+//           env.ml.mlForest(data2)
+           
+            import java.io._
+            val writer = new PrintWriter(new File("data/regression_result.csv"))
+            val sdf = new SimpleDateFormat("yyyyMMdd")
+            val begin = sdf.parse("20150901")
+            val cal = new java.util.GregorianCalendar
+            cal.setTime(begin)
+            predictions.limit(60).select("prediction").collect.foreach { 
+               case Row(predic: String) =>
+                  //println(predic)
+               case Row(predic: Double) =>
+                 val dss = sdf.format(cal.getTime())
+                  writer.println(s"$artist_id_,$predic,$dss")
+                  cal.add(Calendar.DATE, 1)
+               case _ => 
+            }
+            writer.close()
            
             
         }
