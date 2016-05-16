@@ -97,6 +97,8 @@ case class MLSample(
       
       // Train a DecisionTree model.
       val dt = new DecisionTreeRegressor()
+        //.setMaxDepth(10)
+        //.setMaxBins(100)
         .setLabelCol("label")
         .setFeaturesCol("indexedFeatures")
       
