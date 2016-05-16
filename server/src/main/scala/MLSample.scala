@@ -89,7 +89,7 @@ case class MLSample(
       val featureIndexer = new VectorIndexer()
         .setInputCol("features")
         .setOutputCol("indexedFeatures")
-        .setMaxCategories(20)
+        .setMaxCategories(25)
         .fit(data)
       
       // Split the data into training and test sets (30% held out for testing)

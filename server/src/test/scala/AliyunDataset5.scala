@@ -178,7 +178,12 @@ class AliyunDataset5 extends FlatSpec with Matchers with BeforeAndAfterAll with 
                 val tmp0 = agg_result.map { row => 
                     val artist_id = row.get(0).toString()
                     val plays = row.get(1).toString().toDouble
-                    val downloads = row.get(2).toString().toDouble
+                    var downloads:Double = 0
+                    if(row.get(2) == null)
+                     downloads = 0
+                    else
+                      downloads = row.get(2).toString().toDouble
+                      
                     var favors:Double = 0
                     if(row.get(3) == null)
                      favors = 0
