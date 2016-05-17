@@ -89,7 +89,7 @@ case class MLSample(
       val featureIndexer = new VectorIndexer()
         .setInputCol("features")
         .setOutputCol("indexedFeatures")
-        .setMaxCategories(25)
+        .setMaxCategories(100)
         .fit(data)
       
       // Split the data into training and test sets (30% held out for testing)
@@ -98,7 +98,7 @@ case class MLSample(
       // Train a DecisionTree model.
       val dt = new DecisionTreeRegressor()
         //.setMaxDepth(10)
-        //.setMaxBins(100)
+        .setMaxBins(100)
         .setLabelCol("label")
         .setFeaturesCol("indexedFeatures")
       
