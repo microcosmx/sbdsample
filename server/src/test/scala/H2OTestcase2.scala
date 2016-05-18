@@ -102,12 +102,13 @@ class H2OTestcase2 extends FlatSpec with Matchers with BeforeAndAfterAll with Te
             import _root_.hex.tree.gbm.GBMModel.GBMParameters
             val gbmParams = new GBMParameters()
             gbmParams._train = train.key
-            gbmParams._response_column = "CAPSULE"
+            gbmParams._response_column = "y"
             gbmParams._ntrees = 10
             val gbmModel = new GBM(gbmParams).trainModel.get
             println("---------------->print Model")
             println(gbmModel)
-            println("---------------->print End")
+            println("---------------->print output")
+            println(gbmModel._output)
             
 
         }
