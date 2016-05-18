@@ -33,7 +33,8 @@ case class artistId_plays_ds(
     initCount:Double,
     pubDate:Double,
     lang:Double,
-    gender:Double
+    gender:Double,
+    pSpan:Double
 )
 
 case class params(

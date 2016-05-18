@@ -39,7 +39,7 @@ import org.apache.spark.sql.types.{StructType,StructField,StringType};
 
 import akka.testkit.TestKitBase
 
-class AliyunDataset3 extends FlatSpec with Matchers with BeforeAndAfterAll with TestKitBase {
+class AliyunDataset3_H2O extends FlatSpec with Matchers with BeforeAndAfterAll with TestKitBase {
 
     implicit lazy val system = ActorSystem()
     implicit val timeout: Timeout = 1.minute
@@ -182,13 +182,7 @@ class AliyunDataset3 extends FlatSpec with Matchers with BeforeAndAfterAll with 
             val tmp0 = agg_result.map { row => 
                 val artist_id = row.get(0).toString()
                 val plays = row.get(1).toString().toDouble
-                
-                var downloads:Double = 0
-                if(row.get(2) == null)
-                 downloads = 0
-                else
-                  downloads = row.get(2).toString().toDouble
-                  
+                val downloads = row.get(2).toString().toDouble
                 var favors:Double = 0
                 if(row.get(3) == null)
                  favors = 0

@@ -128,18 +128,22 @@ class AliyunDataset5 extends FlatSpec with Matchers with BeforeAndAfterAll with 
            
            for(artist_id_ <- art_ids){
                println(s"---------artist : ${artist_id_}-----------")
+               
                val songDF = songDF_base.filter(songDF_base("artist_id") === artist_id_)
                 val result1 = songDF
                       .join(uactDF, songDF("song_id") === uactDF("song_id"))
+                      //.filter(songDF("publish_time") >= uactDF("Ds"))
                       .filter(uactDF("action_type") === 1)
                       .groupBy(songDF("artist_id") as "artist_id", uactDF("Ds") as "Ds")
-                      .agg(count("action_type") as "Plays", avg("song_init_plays") as "initCount", max("publish_time") as "pubDate", avg("Language") as "lang", avg("Gender") as "gender")
+                      .agg(count("action_type") as "Plays", sum("song_init_plays") as "initCount", max("publish_time") as "pubDate", 
+                          avg("Language") as "lang", avg("Gender") as "gender", sum("gmt_create") as "pSpan")
                       .sort("Ds").sort("artist_id")
-                      .select("artist_id","Plays","Ds","initCount", "pubDate","lang","gender")
+                      .select("artist_id","Plays","Ds","initCount", "pubDate","lang","gender","pSpan")
                       .sort("Ds")
                   
                  val result2 = songDF
                       .join(uactDF, songDF("song_id") === uactDF("song_id"))
+                      //.filter(songDF("publish_time") >= uactDF("Ds"))
                       .filter(uactDF("action_type") === 2)
                       .groupBy(songDF("artist_id") as "artist_id", uactDF("Ds") as "Ds")
                       .agg(count("action_type") as "Downloads")
@@ -150,6 +154,7 @@ class AliyunDataset5 extends FlatSpec with Matchers with BeforeAndAfterAll with 
                   
                   val result3 = songDF
                       .join(uactDF, songDF("song_id") === uactDF("song_id"))
+                      //.filter(songDF("publish_time") >= uactDF("Ds"))
                       .filter(uactDF("action_type") === 3)
                       .groupBy(songDF("artist_id") as "artist_id", uactDF("Ds") as "Ds")
                       .agg(count("action_type") as "Favors")
@@ -171,13 +176,18 @@ class AliyunDataset5 extends FlatSpec with Matchers with BeforeAndAfterAll with 
                       "initCount",
                       "pubDate",
                       "lang",
-                      "gender")
+                      "gender",
+                      "pSpan")
+                      
+                  agg_result.printSchema()
+                  agg_result.show()
                 
                 //translate  date to num   
                 import org.apache.spark.mllib.linalg.{Vector, Vectors}
                 val tmp0 = agg_result.map { row => 
                     val artist_id = row.get(0).toString()
                     val plays = row.get(1).toString().toDouble
+                    
                     var downloads:Double = 0
                     if(row.get(2) == null)
                      downloads = 0
@@ -193,8 +203,30 @@ class AliyunDataset5 extends FlatSpec with Matchers with BeforeAndAfterAll with 
                     val ds = row.get(4).toString()
                     val initCount = row.get(5).toString().toDouble
                     val pubDate = row.get(6).toString()
-                    val lang = row.get(7).toString().toDouble
-                    val gender = row.get(8).toString().toDouble
+                    
+                    var lang = row.get(7).toString().toDouble
+                    val langMap = Map(
+                        Math.abs(lang-1)->1,
+                        Math.abs(lang-2)->2,
+                        Math.abs(lang-3)->3,
+                        Math.abs(lang-4)->4,
+                        Math.abs(lang-11)->11,
+                        Math.abs(lang-12)->12,
+                        Math.abs(lang-14)->14,
+                        Math.abs(lang-100)->100
+                    )
+                    val langkey = langMap.keySet.toSeq.sortBy(x=>x).head
+                    lang = langMap(langkey)
+                    
+                    var gender = row.get(8).toString().toDouble
+                    if(gender < 1.5)
+                      gender = 1
+                    else if(gender > 2.5)
+                      gender = 3
+                    else 
+                      gender = 2
+                      
+                    val pSpan = row.get(9).toString().toDouble
                     
                     //count the number of days since 2015-03-01
                     val sdf=new SimpleDateFormat("yyyyMMdd")
@@ -204,28 +236,35 @@ class AliyunDataset5 extends FlatSpec with Matchers with BeforeAndAfterAll with 
                     val between:Long=(end.getTime-begin.getTime)/1000
                     val hour:Float=between.toFloat/3600
                     val days:Long = hour.toLong/24
+                    val date_feature = days/1
                     
+                    val begin_pub = sdf.parse("20170101")
                     val end_pub = sdf.parse(pubDate)
-                    val between_pub:Long=(end_pub.getTime-begin.getTime)/1000
+                    val between_pub:Long=(begin_pub.getTime-end_pub.getTime)/1000
                     val hour_pub:Float=between_pub.toFloat/3600
                     val days_pub:Long = hour_pub.toLong/24
+                    val pubDate_feature = days_pub/180
                     
                     artistId_plays_ds(
                         artist_id= artist_id,
                         Plays= plays,
                         Downloads = downloads,
                         Favors= favors,
-                        Ds=days.toDouble,
+                        Ds=date_feature.toDouble,
                         initCount=initCount,
-                        pubDate=days_pub.toDouble,
+                        pubDate=pubDate_feature.toDouble,
                         lang=lang,
-                        gender=gender
+                        gender=gender,
+                        pSpan=pSpan
                     )
                     
                   }
               
                val seq = tmp0.collect().toSeq
                val data = sc.parallelize(seq).toDF
+               
+               //println("----------data size-----------")
+               //println(s"----------${data.count}-----------")
                
                val dataRDD = data.map { row => 
                     val artist_id = row.get(0).toString()
@@ -235,8 +274,11 @@ class AliyunDataset5 extends FlatSpec with Matchers with BeforeAndAfterAll with 
                     val ds = row.get(4).toString().toDouble
                     val initCount = row.get(5).toString().toDouble
                     val pubDate = row.get(6).toString().toDouble
+                    
                     val lang = row.get(7).toString().toDouble
                     val gender = row.get(8).toString().toDouble
+                    
+                    val pSpan = row.get(9).toString().toDouble
                     
                     val label = plays
                     val features = Vectors.dense(Array(downloads,favors,ds,initCount,pubDate,lang,gender))
@@ -246,7 +288,7 @@ class AliyunDataset5 extends FlatSpec with Matchers with BeforeAndAfterAll with 
                     )
                }
                
-               val trainingRDD = data.filter(data("Ds")<180).map { row => 
+               val trainingRDD = data.filter(data("Ds")<200).map { row => 
                     val artist_id = row.get(0).toString()
                     val plays = row.get(1).toString().toDouble
                     val downloads = row.get(2).toString().toDouble
@@ -254,8 +296,11 @@ class AliyunDataset5 extends FlatSpec with Matchers with BeforeAndAfterAll with 
                     val ds = row.get(4).toString().toDouble
                     val initCount = row.get(5).toString().toDouble
                     val pubDate = row.get(6).toString().toDouble
+                    
                     val lang = row.get(7).toString().toDouble
                     val gender = row.get(8).toString().toDouble
+                    
+                    val pSpan = row.get(9).toString().toDouble
                     
                     val label = plays
                     val features = Vectors.dense(Array(downloads,favors,ds,initCount,pubDate,lang,gender))
@@ -266,16 +311,22 @@ class AliyunDataset5 extends FlatSpec with Matchers with BeforeAndAfterAll with 
                
                }
                
-               val testRDD = data.filter("Ds % 3 = 0").map { row => 
+               var ds_begin = 180
+               val testRDD = data.filter("Ds > 60 and Ds % 2 = 0").map { row => 
                     val artist_id = row.get(0).toString()
                     val plays = row.get(1).toString().toDouble
                     val downloads = row.get(2).toString().toDouble
                     val favors = row.get(3).toString().toDouble
-                    val ds = row.get(4).toString().toDouble
+                    //val ds = row.get(4).toString().toDouble
+                    ds_begin += 1
+                    val ds = ds_begin
                     val initCount = row.get(5).toString().toDouble
                     val pubDate = row.get(6).toString().toDouble
+                    
                     val lang = row.get(7).toString().toDouble
                     val gender = row.get(8).toString().toDouble
+                    
+                    val pSpan = row.get(9).toString().toDouble
                     
                     val label = plays
                     val features = Vectors.dense(Array(downloads,favors,ds,initCount,pubDate,lang,gender))
@@ -288,6 +339,9 @@ class AliyunDataset5 extends FlatSpec with Matchers with BeforeAndAfterAll with 
                val data2 = sc.parallelize(dataRDD.collect().toSeq).toDF
                val trainingData = sc.parallelize(trainingRDD.collect().toSeq).toDF
                val testData = sc.parallelize(testRDD.collect().toSeq).toDF
+               
+               data2.printSchema()
+               data2.show()
                
                
                val predictions = env.ml.mlDTree(data2,trainingData,testData)
