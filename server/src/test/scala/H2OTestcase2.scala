@@ -109,6 +109,12 @@ class H2OTestcase2 extends FlatSpec with Matchers with BeforeAndAfterAll with Te
             println(gbmModel)
             println("---------------->print output")
             println(gbmModel._output)
+            println("---------------->print auc")
+            println(gbmModel.auc)
+            
+            val predictTable = gbmModel.score(train)
+            println("---------------->print predictTable")
+            println(predictTable)
             
 
         }
