@@ -200,26 +200,26 @@ class AliyunDataset3 extends FlatSpec with Matchers with BeforeAndAfterAll with 
                 val pubDate = row.get(6).toString()
                 
                 var lang = row.get(7).toString().toDouble
-                val langMap = Map(
-                    Math.abs(lang-1)->1,
-                    Math.abs(lang-2)->2,
-                    Math.abs(lang-3)->3,
-                    Math.abs(lang-4)->4,
-                    Math.abs(lang-11)->11,
-                    Math.abs(lang-12)->12,
-                    Math.abs(lang-14)->14,
-                    Math.abs(lang-100)->100
-                )
-                val langkey = langMap.keySet.toSeq.sortBy(x=>x).head
-                lang = langMap(langkey)
+//                val langMap = Map(
+//                    Math.abs(lang-1)->1,
+//                    Math.abs(lang-2)->2,
+//                    Math.abs(lang-3)->3,
+//                    Math.abs(lang-4)->4,
+//                    Math.abs(lang-11)->11,
+//                    Math.abs(lang-12)->12,
+//                    Math.abs(lang-14)->14,
+//                    Math.abs(lang-100)->100
+//                )
+//                val langkey = langMap.keySet.toSeq.sortBy(x=>x).head
+//                lang = langMap(langkey)
                 
                 var gender = row.get(8).toString().toDouble
-                if(gender < 1.5)
-                  gender = 1
-                else if(gender > 2.5)
-                  gender = 3
-                else 
-                  gender = 2
+//                if(gender < 1.5)
+//                  gender = 1
+//                else if(gender > 2.5)
+//                  gender = 3
+//                else 
+//                  gender = 2
                   
                 val pSpan = row.get(9).toString().toDouble
                 
@@ -238,7 +238,7 @@ class AliyunDataset3 extends FlatSpec with Matchers with BeforeAndAfterAll with 
                 val between_pub:Long=(begin_pub.getTime-end_pub.getTime)/1000
                 val hour_pub:Float=between_pub.toFloat/3600
                 val days_pub:Long = hour_pub.toLong/24
-                val pubDate_feature = days_pub/180
+                val pubDate_feature = days_pub/90
                 
                 artistId_plays_ds(
                     artist_id= artist_id,
@@ -307,12 +307,16 @@ class AliyunDataset3 extends FlatSpec with Matchers with BeforeAndAfterAll with 
            }
            
            var ds_begin = 180
-           val testRDD = data.filter("Ds > 60 and Ds % 2 = 0").map { row => 
+           val testRDD = data.sort($"Ds".desc)
+             .filter("Ds >= 150 or (Ds < 150 and Ds % 2 = 0)")
+             .collect
+             .map { row => 
                 val artist_id = row.get(0).toString()
                 val plays = row.get(1).toString().toDouble
                 val downloads = row.get(2).toString().toDouble
                 val favors = row.get(3).toString().toDouble
                 //val ds = row.get(4).toString().toDouble
+                //println(row.get(4).toString().toDouble)
                 ds_begin += 1
                 val ds = ds_begin
                 val initCount = row.get(5).toString().toDouble
@@ -333,7 +337,7 @@ class AliyunDataset3 extends FlatSpec with Matchers with BeforeAndAfterAll with 
            }
            val data2 = sc.parallelize(dataRDD.collect().toSeq).toDF
            val trainingData = sc.parallelize(trainingRDD.collect().toSeq).toDF
-           val testData = sc.parallelize(testRDD.collect().toSeq).toDF
+           val testData = sc.parallelize(testRDD.toSeq).toDF
            
            data2.printSchema()
            data2.show()
