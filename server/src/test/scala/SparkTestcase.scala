@@ -34,11 +34,8 @@ import org.apache.spark.mllib.util.MLUtils
 import org.apache.spark.{SparkContext, SparkConf}
 import org.apache.spark.sql.SQLContext
 import org.apache.spark.sql.types.{StructType,StructField,StringType}
-import org.apache.spark.h2o._
 import akka.testkit.TestKitBase
-import org.apache.spark.repl.h2o.H2OInterpreter
 import org.apache.spark.repl._
-// org/apache/spark/repl/
 
 class SparkTestcase extends FlatSpec with Matchers with BeforeAndAfterAll with TestKitBase {
 
@@ -48,7 +45,6 @@ class SparkTestcase extends FlatSpec with Matchers with BeforeAndAfterAll with T
     var fs: org.apache.hadoop.fs.FileSystem = null
     var sc: org.apache.spark.SparkContext = null
     var sqlContext: org.apache.spark.sql.SQLContext = null
-    var hc:org.apache.spark.h2o.H2OContext = null
 
     override def beforeAll() {
         import org.apache.log4j.Logger
@@ -69,10 +65,8 @@ class SparkTestcase extends FlatSpec with Matchers with BeforeAndAfterAll with T
 //        conf.set("spark.repl.class.uri",H2OInterpreter.classServerUri)
 
         sc = new org.apache.spark.SparkContext(conf)
+        sqlContext = new org.apache.spark.sql.SQLContext(sc)
 
-//        sqlContext = new org.apache.spark.sql.SQLContext(sc)
-//                hc = H2OContext.getOrCreate(sc)
-//        val h2oContext = new H2OContext(sc).start()
     }
 
     override def afterAll() {
@@ -91,20 +85,8 @@ class SparkTestcase extends FlatSpec with Matchers with BeforeAndAfterAll with T
 
         try{
             import env.sqlContext.implicits._
-            
-//            env.ml.LinearRegressionTest1()
-            
-//            import java.io.File
-//            val path = "data/examples/smalldata/prostate.csv"
-//            val prostateHF = new H2OFrame(new File(path))
-//            import  org.apache.spark.examples.h2o.Prostate
-//            val prostateRDD = hc.asRDD[Prostate](prostateHF)
-//            import org.apache.spark.mllib.clustering.KMeans
-//            import org.apache.spark.mllib.linalg.Vectors
-//            val train = prostateRDD.map( v => Vectors.dense(v.CAPSULE.get*1.0, v.AGE.get*1.0, v.DPROS.get*1.0,v.DCAPS.get*1.0, v.GLEASON.get*1.0))
-//            val clusters = KMeans.train(train, 5, 20)
-            
-//              val predictResult4 = env.ml.mlDTree()
+
+            println(sc.parallelize(1 to 1000).count)
             
         }
         catch {
