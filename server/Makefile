@@ -1,7 +1,6 @@
 all: build submit
 
 jar = sbdsample-assembly-0.1-SNAPSHOT.jar
-args += --properties-file conf/spark.properties 
 args += --driver-java-options "-Dlog4j.configuration=file:conf/log4j.properties"
 args += target/scala-2.10/$(jar)
 
