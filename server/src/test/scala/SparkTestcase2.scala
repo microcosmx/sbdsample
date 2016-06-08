@@ -37,7 +37,35 @@ import org.apache.spark.sql.types.{StructType,StructField,StringType}
 import akka.testkit.TestKitBase
 import org.apache.spark.repl._
 
-class SparkTestcase extends FlatSpec with Matchers with BeforeAndAfterAll with TestKitBase {
+
+import scala.Option.option2Iterable
+import scala.collection.mutable.ListBuffer
+import scala.tools.nsc.util.FailedInterrupt
+import scala.tools.refactoring.Refactoring
+import scala.tools.refactoring.common.Change
+import scala.tools.refactoring.common.NewFileChange
+import scala.tools.refactoring.common.TextChange
+import scala.tools.refactoring.util.CompilerProvider
+import scala.tools.refactoring.common.InteractiveScalaCompiler
+import scala.tools.refactoring.common.Selections
+import language.{ postfixOps, reflectiveCalls }
+import scala.tools.refactoring.common.NewFileChange
+import scala.tools.refactoring.common.RenameSourceFileChange
+import scala.tools.refactoring.implementations.Rename
+import scala.tools.refactoring.common.TracingImpl
+import scala.tools.refactoring.util.UniqueNames
+
+import scala.tools.refactoring._
+import scala.tools.refactoring.util._
+import scala.tools.refactoring.analysis._
+import scala.tools.refactoring.common._
+import scala.tools.refactoring.implementations._
+import scala.tools.refactoring.sourcegen._
+import scala.tools.refactoring.transformation._
+            
+            
+
+class SparkTestcase2 extends FlatSpec with Matchers with BeforeAndAfterAll with TestKitBase {
 
     implicit lazy val system = ActorSystem()
     implicit val timeout: Timeout = 1.minute
@@ -74,6 +102,7 @@ class SparkTestcase extends FlatSpec with Matchers with BeforeAndAfterAll with T
         fs.close()
         system.shutdown()
     }
+    
 
     it should "run it" in {
         val cfg = new Config("conf/server.properties")
@@ -85,73 +114,53 @@ class SparkTestcase extends FlatSpec with Matchers with BeforeAndAfterAll with T
 
         try{
             import env.sqlContext.implicits._
+            
+            import scala.reflect.internal._
+            import scala.reflect.internal.util._
+            val global = (new CompilerInstance).compiler
+            import global._
+            
+            val src = """
+              package shadowing
+          
+              object TheShadow {
+                val i = 1
+          
+                def method: Unit = {
+                  val i = ""
+                  ()
+                }
+              }
+          
+              class Xyz(xyzxyz: Long) {
+          
+                def method: Unit = {
+                  val xyzxyz = ""
+                  val i = xyzxyz
+                  ()
+                }
+              }
+          
+              class Z {
+                import TheShadow._
+          
+                val i = Nil
+              }"""
+            
+            
+            val file = new BatchSourceFile(UniqueNames.basename(), src)
+            
 
+            println("-----------------")
             println(sc.parallelize(1 to 1000).count)
             
-            /*
-            import scalawebsocket._
-            WebSocket().open("ws://localhost:8600/server/?module=cup_info").sendText("text").close().shutdown()
-            WebSocket().open("ws://127.0.0.1:8600/server/?module=cup_info").onTextMessage(msg => 
-              println(msg)
-            )
-            * */
-            
-            
-            
-            import java.io._
-            import org.apache.commons._
-            import org.apache.http._
-            import org.apache.http.client._
-            import org.apache.http.client.methods._
-            import org.apache.http.impl.client.DefaultHttpClient
-            import java.util.ArrayList
-            import org.apache.http.message.BasicNameValuePair
-            import org.apache.http.client.entity.UrlEncodedFormEntity
-            import org.apache.http.util._
-            
-            val url = "http://localhost:8600/server/";
-        
-            val client = new DefaultHttpClient
-            val params = client.getParams
-            params.setParameter("module", "cup_info")
-            
-            val get = new HttpGet(url)
-            //val post = new HttpPost(url)
-            //post.addHeader("appid","YahooDemo")
-            //val nameValuePairs = new ArrayList[NameValuePair](1)
-            //nameValuePairs.add(new BasicNameValuePair("registrationid", "123456789"));
-            //post.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-            
-            // send the post request
-            //val response = client.execute(post)
-            
-            //send the get
-            val response = client.execute(get)
-            println("--- HEADERS ---")
-            response.getAllHeaders.foreach(arg => println(arg))
-            println("--- Contents ---")
-            val entity = response.getEntity()
-            println(EntityUtils.toString(entity))
-            /*
-            byte[] buffer = new byte[1024];
-            InputStream inputStream = entity.getContent();
-            try {
-              int bytesRead = 0;
-              BufferedInputStream bis = new BufferedInputStream(inputStream);
-              while ((bytesRead = bis.read(buffer)) != -1) {
-                String chunk = new String(buffer, 0, bytesRead);
-                System.out.println(chunk);
-              }
-            } catch (IOException ioException) {
-              ioException.printStackTrace()
-            }
-            */
-            
-        } catch {
-              case t: Throwable =>
-                  t.printStackTrace()
-          }
+        }
+        catch {
+            case t: Throwable =>
+                t.printStackTrace()
+        }
     }
+    
 
 
 }
