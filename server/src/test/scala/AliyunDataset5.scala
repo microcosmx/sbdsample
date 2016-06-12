@@ -324,7 +324,7 @@ class AliyunDataset5 extends FlatSpec with Matchers with BeforeAndAfterAll with 
         //data2.show()
 
         val predictions = env.ml.mlDTree(data2, trainingData, testData)
-        println("-----------result-------------")
+        //println("-----------result-------------")
         //predictions.printSchema()
         //predictions.select("prediction", "label", "features").show(100)
 
