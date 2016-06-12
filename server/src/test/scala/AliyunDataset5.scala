@@ -124,7 +124,7 @@ class AliyunDataset5 extends FlatSpec with Matchers with BeforeAndAfterAll with 
       import java.io._
       val writer = new PrintWriter(new File("data/mars_tianchi_artist_plays_predict.csv"))
 
-      for (artist_id_ <- art_ids.take(3)) {
+      for (artist_id_ <- art_ids.take(5)) {
         println(s"---------artist : ${artist_id_}-----------")
 
         val songDF = songDF_base.filter(songDF_base("artist_id") === artist_id_)
