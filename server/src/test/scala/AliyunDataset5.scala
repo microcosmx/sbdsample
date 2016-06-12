@@ -125,7 +125,7 @@ class AliyunDataset5 extends FlatSpec with Matchers with BeforeAndAfterAll with 
       val writer = new PrintWriter(new File("data/mars_tianchi_artist_plays_predict.csv"))
 
       for (artist_id_ <- art_ids.take(5)) {
-        println(s"---------artist : ${artist_id_}-----------")
+        //println(s"---------artist : ${artist_id_}-----------")
 
         val songDF = songDF_base.filter(songDF_base("artist_id") === artist_id_)
         val result1 = songDF
@@ -177,8 +177,8 @@ class AliyunDataset5 extends FlatSpec with Matchers with BeforeAndAfterAll with 
             "gender",
             "pSpan")
 
-        agg_result.printSchema()
-        agg_result.show()
+        //agg_result.printSchema()
+        //agg_result.show()
 
         //translate  date to num   
         import org.apache.spark.mllib.linalg.{ Vector, Vectors }
@@ -320,13 +320,13 @@ class AliyunDataset5 extends FlatSpec with Matchers with BeforeAndAfterAll with 
         val trainingData = sc.parallelize(trainingRDD.collect().toSeq).toDF
         val testData = sc.parallelize(testRDD.toSeq).toDF
 
-        data2.printSchema()
-        data2.show()
+        //data2.printSchema()
+        //data2.show()
 
         val predictions = env.ml.mlDTree(data2, trainingData, testData)
         println("-----------result-------------")
-        predictions.printSchema()
-        predictions.select("prediction", "label", "features").show(100)
+        //predictions.printSchema()
+        //predictions.select("prediction", "label", "features").show(100)
 
         val sdf = new SimpleDateFormat("yyyyMMdd")
         val begin = sdf.parse("20150901")
