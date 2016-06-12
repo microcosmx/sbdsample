@@ -341,7 +341,7 @@ class AliyunDataset6 extends FlatSpec with Matchers with BeforeAndAfterAll with 
               case Row(predic: Double) =>
                 val ds_ = sdf.format(cal.getTime())
                 val predic_ = Math.floor(predic).toInt
-                writer.println(s"$artist_id_,$predic_,$ds_")
+                //writer.println(s"$artist_id_,$predic_,$ds_")
                 cal.add(Calendar.DATE, 1)
               case _ =>
             }
