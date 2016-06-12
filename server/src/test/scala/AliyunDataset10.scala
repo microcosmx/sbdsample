@@ -39,7 +39,7 @@ import org.apache.spark.sql.types.{ StructType, StructField, StringType };
 
 import akka.testkit.TestKitBase
 
-class AliyunDataset5 extends FlatSpec with Matchers with BeforeAndAfterAll with TestKitBase {
+class AliyunDataset10 extends FlatSpec with Matchers with BeforeAndAfterAll with TestKitBase {
 
   implicit lazy val system = ActorSystem()
   implicit val timeout: Timeout = 1.minute
@@ -87,7 +87,7 @@ class AliyunDataset5 extends FlatSpec with Matchers with BeforeAndAfterAll with 
     try {
       import env.sqlContext.implicits._
 
-      val lines = env.sc.textFile("data/mars_tianchi_songs.csv")
+      val lines = env.sc.textFile("data/p2_mars_tianchi_songs.csv")
         .map(_.split(",", -1).map(_.trim)).collect
       val songs = lines
         .map(line =>
@@ -100,7 +100,7 @@ class AliyunDataset5 extends FlatSpec with Matchers with BeforeAndAfterAll with 
             Gender = line(5).toString)).toSeq
       val songDF_base = env.sc.parallelize(songs).toDF
 
-      val mtua = env.sc.textFile("data/mars_tianchi_user_actions.csv")
+      val mtua = env.sc.textFile("data/p2_mars_tianchi_user_actions.csv")
       val mtua_rdd = mtua.map(_.split(",", -1).map(_.trim)).map { line =>
         mars_tianchi_user_actions(
           user_id = line(0).toString,
@@ -122,9 +122,9 @@ class AliyunDataset5 extends FlatSpec with Matchers with BeforeAndAfterAll with 
       println(s"---------artist number : ${art_ids.length}-----------")
 
       import java.io._
-      val writer = new PrintWriter(new File("data/mars_tianchi_artist_plays_predict.csv"))
+      val writer = new PrintWriter(new File("data/p2_mars_tianchi_artist_plays_predict.csv"))
 
-      for (artist_id_ <- art_ids.take(3)) {
+      for (artist_id_ <- art_ids) {
         println(s"---------artist : ${artist_id_}-----------")
 
         val songDF = songDF_base.filter(songDF_base("artist_id") === artist_id_)

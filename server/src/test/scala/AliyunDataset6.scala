@@ -126,7 +126,7 @@ class AliyunDataset6 extends FlatSpec with Matchers with BeforeAndAfterAll with 
 
       val futureResult = Future.sequence {
         //for(artist_id_ <- art_ids){
-        art_ids.take(5).map { artist_id_ =>
+        art_ids.take(3).map { artist_id_ =>
           future {
             println(s"---------artist : ${artist_id_}-----------")
 
