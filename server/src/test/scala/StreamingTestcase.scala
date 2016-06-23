@@ -85,10 +85,36 @@ class StreamingTestcase extends FlatSpec with Matchers with BeforeAndAfterAll wi
 
         try{
             import env.sqlContext.implicits._
-
-            println(sc.parallelize(1 to 1000).count)
             
-            ss.streamExec()
+            //bash: nc -l localhost 9999
+
+            //println(sc.parallelize(1 to 1000).count)
+            //ss.streamExec()
+            
+            val black_list = sc.parallelize(Array("fail", "sad")).
+              map(black_word => (black_word, black_word))
+        
+            //sc.setCheckpointDir("hdfs://master:9000/library/streaming/black_list_filter/")
+            val ssc = new StreamingContext(sc, Durations.seconds(30))
+        
+            val input_word = ssc.socketTextStream("localhost", 9999)
+        
+            val flattenWord = input_word.flatMap(_.split(" ")).
+              map(row => {
+                (row, row)
+              })
+        
+            val not_black_word = flattenWord.transform(fw => {
+              fw.leftOuterJoin(black_list). // 左连接
+                filter(_._2._2.isEmpty). // 将黑名单中的过滤掉
+                map(_._1) // 只返回关键字
+            })
+        
+            not_black_word.print // 输出
+        
+            ssc.start
+            ssc.awaitTermination
+            sc.stop
             
             
         } catch {
