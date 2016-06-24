@@ -23,7 +23,7 @@ object NetworkWordCount {
     //cat /etc/profile | nc -lk 9999
 
     // Create the context with a 1 second batch size
-    val sparkConf = new SparkConf().setAppName("NetworkWordCount").setMaster("local[*]")
+    val sparkConf = new SparkConf().setAppName("NetworkWord2Count").setMaster("local[*]")
     val ssc = new StreamingContext(sparkConf, Seconds(1))
 
     // Create a socket stream on target ip:port and count the

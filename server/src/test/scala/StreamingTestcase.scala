@@ -95,7 +95,7 @@ class StreamingTestcase extends FlatSpec with Matchers with BeforeAndAfterAll wi
               map(black_word => (black_word, black_word))
         
             //sc.setCheckpointDir("hdfs://master:9000/library/streaming/black_list_filter/")
-            val ssc = new StreamingContext(sc, Durations.seconds(30))
+            val ssc = new StreamingContext(sc, Durations.seconds(5))
         
             val input_word = ssc.socketTextStream("localhost", 9999)
         
