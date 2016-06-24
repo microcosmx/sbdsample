@@ -20,9 +20,10 @@ object NetworkWordCount {
 
     //sudo yum install NetCat
     //nc -lk 9999
+    //cat /etc/profile | nc -lk 9999
 
     // Create the context with a 1 second batch size
-    val sparkConf = new SparkConf().setAppName("NetworkWordCount")
+    val sparkConf = new SparkConf().setAppName("NetworkWordCount").setMaster("local[*]")
     val ssc = new StreamingContext(sparkConf, Seconds(1))
 
     // Create a socket stream on target ip:port and count the
