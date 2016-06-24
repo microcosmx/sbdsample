@@ -64,6 +64,8 @@ object StreamMain extends App {
         //spark related processing sample
         import env.sqlContext.implicits._
         
+        //bash: nc -l localhost 9999
+        
         val black_list = sc.parallelize(Array("fail", "sad")).
           map(black_word => (black_word, black_word))
     
