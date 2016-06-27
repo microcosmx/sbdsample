@@ -86,7 +86,8 @@ class StreamingTestcase extends FlatSpec with Matchers with BeforeAndAfterAll wi
         try{
             import env.sqlContext.implicits._
             
-            //bash: nc -l localhost 9999
+            //nc -lk 9999
+            //cat /etc/profile | nc -lk 9999
 
             //println(sc.parallelize(1 to 1000).count)
             //ss.streamExec()
