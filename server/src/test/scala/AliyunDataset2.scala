@@ -8,6 +8,7 @@ import org.apache.avro._
 import org.apache.avro.file._
 import org.apache.avro.reflect._
 import org.apache.hadoop.fs._
+import org.apache.hadoop.conf._
 import org.apache.spark._
 import org.apache.spark.rdd._
 import org.apache.spark.sql._
@@ -43,6 +44,7 @@ class AliyunDataset2 extends FlatSpec with Matchers with BeforeAndAfterAll with 
     implicit val timeout: Timeout = 1.minute
 
     var fs: org.apache.hadoop.fs.FileSystem = null
+    var fs_conf: Configuration = null
     var sc: org.apache.spark.SparkContext = null
     var sqlContext: org.apache.spark.sql.SQLContext = null
 
@@ -53,7 +55,8 @@ class AliyunDataset2 extends FlatSpec with Matchers with BeforeAndAfterAll with 
         Logger.getLogger("akka").setLevel(Level.WARN)
         Logger.getLogger("parquet.hadoop").setLevel(Level.WARN)
 
-        fs = FileSystem.get(new org.apache.hadoop.conf.Configuration)
+        fs_conf = new org.apache.hadoop.conf.Configuration
+        fs = FileSystem.get(fs_conf)
 
         val conf = new org.apache.spark.SparkConf
         conf.set("spark.master", "local[*]")
@@ -66,6 +69,7 @@ class AliyunDataset2 extends FlatSpec with Matchers with BeforeAndAfterAll with 
 
         sc = new org.apache.spark.SparkContext(conf)
         sqlContext = new org.apache.spark.sql.SQLContext(sc)
+        
     }
 
     override def afterAll() {
@@ -135,8 +139,12 @@ class AliyunDataset2 extends FlatSpec with Matchers with BeforeAndAfterAll with 
               
           
 
+            println("--------IO---------")
             import java.io._
             val writer = new PrintWriter(new File("data/result.csv"))
+           
+            var time1 = new Date().getTime
+            println(time1)
             result1.collect.foreach { 
                case Row(aid: String,play: String,ds: String,ic: String,pub: String) =>
                   writer.println(s"$aid,$play,$ds,$ic,$pub")
@@ -147,16 +155,26 @@ class AliyunDataset2 extends FlatSpec with Matchers with BeforeAndAfterAll with 
                
                case _ => 
             }
+            println(new Date().getTime - time1)
             writer.close()
             
-            //.saveAsTextFile("data/mars_tianchi_artist_plays_predict")
+            
+            val srcPath = new Path("data/result_1")
+            val dstPath = new Path("data/result_1.txt")
+            time1 = new Date().getTime
+            println(time1)
+            result1.rdd.saveAsTextFile("data/result_1")
+            val srcs = FileUtil.stat2Paths(fs.globStatus(srcPath), srcPath)
+            for (src <- srcs) {
+                FileUtil.copyMerge(fs, src,
+                        fs, dstPath, false, fs_conf,null)
+            }
+            println(new Date().getTime - time1)
             //result1.rdd.repartition(1).saveAsTextFile("data/mars_tianchi_artist_plays_predict.csv")
             //result1.rdd.coalesce(1,true).saveAsTextFile("data/mars_tianchi_artist_plays_predict.csv")
             
             //env.ml.LinearRegressionTest(result1)
-           
 
-           
             
         }
         catch {

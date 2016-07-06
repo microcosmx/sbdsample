@@ -109,11 +109,11 @@ class SparkTestcase extends FlatSpec with Matchers with BeforeAndAfterAll with T
             import org.apache.http.client.entity.UrlEncodedFormEntity
             import org.apache.http.util._
             
-            val url = "http://localhost:8600/server/";
+            val url = "http://10.131.252.157:8600/server/?module=load_avg";
         
             val client = new DefaultHttpClient
-            val params = client.getParams
-            params.setParameter("module", "cup_info")
+            //val params = client.getParams
+            //params.setParameter("module", "cup_info")
             
             val get = new HttpGet(url)
             //val post = new HttpPost(url)
