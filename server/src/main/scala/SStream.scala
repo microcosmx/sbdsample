@@ -14,6 +14,7 @@ case class SStream(
     sc: SparkContext)
 {
     def streamExec() = {
+      //bash: nc -l localhost 9999
       val ssc = new StreamingContext(sc, Seconds(1))
       val lines = ssc.socketTextStream("localhost", 9999)
       val words = lines.flatMap(_.split(" "))

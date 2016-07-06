@@ -12,6 +12,9 @@ clean:
 
 submit:
 	spark-submit --class Main $(args)
+	
+stream:
+	spark-submit --class StreamMain $(args)
 
 dataload:
 	spark-submit --class DataMassage $(args)
