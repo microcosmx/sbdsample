@@ -1,0 +1,6 @@
+/bin/
+/logs/
+/metastore_db/
+/target/
+/derby.log
+/h2ologs/
