@@ -158,7 +158,6 @@ class AliyunDataset2 extends FlatSpec with Matchers with BeforeAndAfterAll with 
             println(new Date().getTime - time1)
             writer.close()
             
-            
             val srcPath = new Path("data/result_1")
             val dstPath = new Path("data/result_1.txt")
             time1 = new Date().getTime
