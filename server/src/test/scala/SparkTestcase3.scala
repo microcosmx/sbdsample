@@ -149,11 +149,12 @@ class SparkTestcase3 extends FlatSpec with Matchers with BeforeAndAfterAll with 
                 future {
                   val timestamp = System.nanoTime
             		  println(s"---------parallel------${timestamp}-----")
-                  val src = s"data/result_y-${timestamp}"
+                  val src = s"data/result_y.txt-${timestamp}"
                   val dst = s"data/result_y-${timestamp}.txt"
                   val dstFinal = s"data/result_y.txt"
                   val srcPath = new Path(src)
                   val dstPath = new Path(dst)
+                  println(s"---${dstPath.getParent}---${dstPath.getName}---")
                   val dstFinalPath = new Path(dstFinal)
                   val result = sc.parallelize(1 to 10).map(_.toString)
                   result.saveAsTextFile(src)
@@ -164,6 +165,7 @@ class SparkTestcase3 extends FlatSpec with Matchers with BeforeAndAfterAll with 
                         fs.rename(dstFinalPath, delPath)
                         fs.rename(dstPath, dstFinalPath)
                         fs.delete(delPath, true)
+                        fs.delete(dstPath, true)
                     }
                     else
                         fs.rename(dstPath, dstFinalPath)

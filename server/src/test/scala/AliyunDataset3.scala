@@ -124,6 +124,10 @@ class AliyunDataset3 extends FlatSpec with Matchers with BeforeAndAfterAll with 
            //filter
            val artist_id_ = "03c6699ea836decbc5c8fc2dbae7bd3b"
            
+           println("-------test-----------")
+           //songDF_base.select(col("Language") + 10).show
+           songDF_base.agg(sum("Language"), sum("Gender")).show
+           
            val songDF = songDF_base.filter(songDF_base("artist_id") === artist_id_)
             val result1 = songDF
                   .join(uactDF, songDF("song_id") === uactDF("song_id"))
